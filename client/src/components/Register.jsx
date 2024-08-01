@@ -1,9 +1,105 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, NavLink } from "react-router-dom";
+import toast from "react-hot-toast";
+import { registerUser } from "../slices/authSlice";
 import Nav from "./Nav";
 import Footer from "./Footer";
 
 function Register() {
+  const [formData, setFormData] = useState({
+    username: "",
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const { username, fullName, email, password, confirmPassword } = formData;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { error, status, fieldErrors } = useSelector((state) => state.auth);
+
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    let hasError = false;
+
+    // Collecting frontend errors
+    let errors = [];
+
+    if (!username) {
+      errors.push("Username is required");
+      hasError = true;
+    }
+
+    if (!fullName) {
+      errors.push("Full Name is required");
+      hasError = true;
+    }
+
+    if (!email) {
+      errors.push("Email is required");
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      errors.push("Please enter a valid email address");
+      hasError = true;
+    }
+
+    if (!password) {
+      errors.push("Password is required");
+      hasError = true;
+    } else if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+      hasError = true;
+    }
+
+    if (!confirmPassword) {
+      errors.push("Please confirm your password");
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      errors.push("Passwords do not match");
+      hasError = true;
+    }
+
+    // Displaying frontend validation errors
+    if (hasError) {
+      errors.forEach((error) => toast.error(error));
+      return;
+    }
+
+    try {
+      const resultAction = await dispatch(
+        registerUser({ username, fullName, email, password })
+      );
+
+      if (registerUser.fulfilled.match(resultAction)) {
+        toast.success("Registration successful!");
+        navigate("/admin/dashboard");
+      } else {
+        // Handling backend validation errors
+        if (resultAction.payload?.errors) {
+          Object.values(resultAction.payload.errors).forEach((message) =>
+            toast.error(message)
+          );
+        } else {
+          toast.error("Failed to register. Please try again.");
+        }
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  };
+
   return (
     <>
       <Nav />
@@ -19,7 +115,7 @@ function Register() {
           <div className="text-center font-['Montserrat']">
             <h1 className="font-semibold md:text-xl">Register</h1>
           </div>
-          <form className="mt-6">
+          <form className="mt-6" onSubmit={onSubmit}>
             <div>
               <label
                 htmlFor="username"
@@ -30,6 +126,8 @@ function Register() {
               <input
                 type="text"
                 name="username"
+                value={username}
+                onChange={onChange}
                 placeholder="Enter Username"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -37,14 +135,16 @@ function Register() {
 
             <div className="mt-4">
               <label
-                htmlFor="fullname"
+                htmlFor="fullName"
                 className="block text-sm text-gray-800 font-['Montserrat'] md:text-xl"
               >
                 Full Name
               </label>
               <input
                 type="text"
-                name="fullname"
+                name="fullName"
+                value={fullName}
+                onChange={onChange}
                 placeholder="Enter Full Name"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -60,6 +160,8 @@ function Register() {
               <input
                 type="email"
                 name="email"
+                value={email}
+                onChange={onChange}
                 placeholder="Enter Email"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -75,6 +177,8 @@ function Register() {
               <input
                 type="password"
                 name="password"
+                value={password}
+                onChange={onChange}
                 placeholder="Enter Password"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -90,6 +194,8 @@ function Register() {
               <input
                 type="password"
                 name="confirmPassword"
+                value={confirmPassword}
+                onChange={onChange}
                 placeholder="Confirm Password"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />

@@ -1,5 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Toaster } from "react-hot-toast";
 import useIsLaptop from "./hooks/useDeviceType";
 import Home from "./components/Home";
 import About from "./components/About";
@@ -10,8 +17,11 @@ import Loader from "./components/Loader";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
+
 function App() {
   const isLaptop = useIsLaptop();
+  const { user } = useSelector((state) => state.auth); // Get user state from Redux
+
   return (
     <>
       <Router>
@@ -24,8 +34,12 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/admin/dashboard"
+            element={user ? <Dashboard /> : <Navigate to="/login" replace />}
+          />
         </Routes>
+        <Toaster />
       </Router>
     </>
   );

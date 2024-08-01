@@ -16,7 +16,7 @@ function Nav() {
       <div className="container px-6 py-4 mx-auto md:flex md:justify-between md:items-center">
         <div className="flex items-center justify-between">
           <NavLink to="/" className="flex items-center">
-            <h1 className="text-gray-800 text-2xl font-bold dark:text-white font-['Montserrat']">
+            <h1 className="text-gray-800 text-2xl font-semibold dark:text-white font-['Montserrat']">
               Rohit.Dev
             </h1>
           </NavLink>

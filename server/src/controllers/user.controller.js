@@ -11,17 +11,58 @@ import bcrypt from "bcrypt";
 const registerUser = asyncHandler(async (req, res) => {
   const { username, fullName, email, password } = req.body;
 
-  if (!username || !fullName || !email || !password) {
-    throw new ApiError(400, "All fields are required.");
+  // Initialize an errors object to collect field-specific errors
+  const errors = {};
+
+  // Check for all fields
+  if (!username) {
+    errors.username = "Username is required.";
+  }
+  if (!fullName) {
+    errors.fullName = "Full Name is required.";
+  }
+  if (!email) {
+    errors.email = "Email is required.";
+  }
+  if (!password) {
+    errors.password = "Password is required.";
   }
 
+  // Check password length
+  if (password && password.length < 8) {
+    errors.password = "Password must be at least 8 characters long.";
+  }
+
+  // If there are any errors, return them
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Check if email is already registered
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ApiError(400, "User already exists.");
+    return res.status(400).json({
+      errors: {
+        email:
+          "User with this email already exists. Please use a different email.",
+      },
+    });
   }
 
+  // Check if username is already taken
+  const existingUsername = await User.findOne({ username });
+  if (existingUsername) {
+    return res.status(400).json({
+      errors: {
+        username: "Username already taken. Please choose a different username.",
+      },
+    });
+  }
+
+  // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // Create new user
   const newUser = await User.create({
     username,
     fullName,
@@ -29,40 +70,61 @@ const registerUser = asyncHandler(async (req, res) => {
     password: hashedPassword,
   });
 
+  // Generate tokens
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     newUser._id
   );
 
-  res.status(201).json(
-    new ApiResponse(
-      201,
-      {
-        user: {
-          id: newUser._id,
-          username: newUser.username,
-          email: newUser.email,
-        },
-        accessToken,
-        refreshToken,
-      },
-      "User registered successfully."
-    )
-  );
+  // Send response
+  res.status(201).json({
+    user: {
+      id: newUser._id,
+      username: newUser.username,
+      email: newUser.email,
+    },
+    accessToken,
+    refreshToken,
+    message: "User registered successfully.",
+  });
 });
 
 // Login User
 const loginUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
-    throw new ApiError(400, "Username and password are required.");
+  // Initialize an errors object to collect field-specific errors
+  const errors = {};
+
+  // Check for all fields
+  if (!username) {
+    errors.username = "Username is required.";
+  }
+  if (!password) {
+    errors.password = "Password is required.";
   }
 
+  // If there are any errors, return them
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Check if user exists
   const user = await User.findOne({ username });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    throw new ApiError(401, "Invalid username or password.");
+  if (!user) {
+    return res.status(401).json({
+      errors: { username: "Invalid username or password." },
+    });
   }
 
+  // Check password
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    return res.status(401).json({
+      errors: { password: "Invalid username or password." },
+    });
+  }
+
+  // Generate tokens
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
   );
@@ -82,35 +144,40 @@ const loginUser = asyncHandler(async (req, res) => {
     maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
   });
 
-  res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { user: { id: user._id, username: user.username } },
-        "Login successful."
-      )
-    );
+  // Send response
+  res.status(200).json({
+    user: { id: user._id, username: user.username },
+    message: "Login successful.",
+  });
 });
 
 // Logout User
 const logoutUser = asyncHandler(async (req, res) => {
-  // Clear the access token cookie
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
+  try {
+    // Clear the access token cookie
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
-  // Clear the refresh token cookie
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
+    // Clear the refresh token cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
-  // Send a success response
-  res.status(200).json(new ApiResponse(200, {}, "Logged out successfully"));
+    // Send a success response
+    res.status(200).json({
+      message: "Logged out successfully.",
+    });
+  } catch (error) {
+    // Handle any unexpected errors
+    res.status(500).json({
+      error: "An unexpected error occurred. Please try again.",
+    });
+  }
 });
 
 // Password Reset Request
@@ -149,8 +216,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
     <a href="${resetUrl}" target="_blank">${resetUrl}</a>
   `;
 
-  // Send the password reset email
   try {
+    // Send the password reset email
     await sendMail({
       email,
       subject: "Password Reset Request",
@@ -158,13 +225,16 @@ const forgotPassword = asyncHandler(async (req, res) => {
       isHtml: true, // Send as HTML email
     });
 
-    res
-      .status(200)
-      .json(new ApiResponse(200, null, "Password reset email sent."));
+    res.status(200).json({
+      message: "Password reset email sent.",
+    });
   } catch (error) {
     // Handle errors in sending email
     console.error("Error sending email:", error);
-    throw new ApiError(500, "Failed to send password reset email.");
+    throw new ApiError(
+      500,
+      "Failed to send password reset email. Please try again later."
+    );
   }
 });
 
@@ -191,14 +261,23 @@ const resetPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid or expired token.");
   }
 
-  user.password = await bcrypt.hash(password, 10);
-  user.resetToken = undefined;
-  user.resetTokenExpiration = undefined;
-  await user.save();
+  try {
+    user.password = await bcrypt.hash(password, 10);
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, null, "Password reset successful."));
+    res.status(200).json({
+      message: "Password reset successful.",
+    });
+  } catch (error) {
+    // Handle errors in updating user password
+    console.error("Error resetting password:", error);
+    throw new ApiError(
+      500,
+      "Failed to reset password. Please try again later."
+    );
+  }
 });
 
 // Refresh Token

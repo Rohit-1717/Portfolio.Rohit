@@ -1,9 +1,78 @@
-import React from "react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, NavLink } from "react-router-dom";
+import toast from "react-hot-toast";
+import { loginUser } from "../slices/authSlice";
 import Nav from "./Nav";
 import Footer from "./Footer";
-import { NavLink } from "react-router-dom";
 
 function Login() {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const { username, password } = formData;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { error, status } = useSelector((state) => state.auth);
+
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    // Clear previous errors
+    setErrors({});
+
+    // Frontend validation
+    if (!username && !password) {
+      toast.error("Username and password are required.");
+      return;
+    }
+
+    if (!username) {
+      toast.error("Username is required.");
+      return;
+    }
+
+    if (!password) {
+      toast.error("Password is required.");
+      return;
+    }
+
+    try {
+      const resultAction = await dispatch(loginUser({ username, password }));
+
+      if (loginUser.fulfilled.match(resultAction)) {
+        toast.success("Login successful!");
+        navigate("/admin/dashboard");
+      } else {
+        // Handle server-side errors from Redux
+        const serverErrors = resultAction.payload?.errors || {};
+
+        if (serverErrors.username) {
+          toast.error(serverErrors.username);
+        }
+
+        if (serverErrors.password) {
+          toast.error(serverErrors.password);
+        }
+
+        if (!serverErrors.username && !serverErrors.password) {
+          toast.error("Failed to login. Please try again.");
+        }
+      }
+    } catch (err) {
+      // Handle unexpected errors
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  };
+
   return (
     <>
       <Nav />
@@ -19,7 +88,7 @@ function Login() {
           <div className="text-center font-['Montserrat']">
             <h1 className="font-semibold md:text-xl">Admin Login</h1>
           </div>
-          <form className="mt-6">
+          <form className="mt-6" onSubmit={onSubmit}>
             <div>
               <label
                 htmlFor="username"
@@ -30,6 +99,8 @@ function Login() {
               <input
                 type="text"
                 name="username"
+                value={username}
+                onChange={onChange}
                 placeholder="Enter Username"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -45,6 +116,8 @@ function Login() {
               <input
                 type="password"
                 name="password"
+                value={password}
+                onChange={onChange}
                 placeholder="Enter Password"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
@@ -61,7 +134,7 @@ function Login() {
 
             <p className="mt-2 text-sm text-center text-gray-400 md:text-xl">
               <NavLink
-                to="/"
+                to="/forgot-password"
                 className="font-medium text-gray-700 hover:underline"
               >
                 Forgot Password?
