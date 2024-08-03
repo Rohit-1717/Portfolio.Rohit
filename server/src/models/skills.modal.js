@@ -1,5 +1,18 @@
 import { mongoose, Schema } from "mongoose";
 
+const skillItemSchema = new Schema({
+  _id: {
+    type: String,
+    default: function () {
+      return new mongoose.Types.ObjectId().toString();
+    },
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
 const skillSchema = new Schema(
   {
     user: {
@@ -7,9 +20,9 @@ const skillSchema = new Schema(
       ref: "User",
       required: true,
     },
-    frontend: [String],
-    backend: [String],
-    softSkills: [String],
+    frontend: [skillItemSchema],
+    backend: [skillItemSchema],
+    softSkills: [skillItemSchema],
   },
   { timestamps: true }
 );

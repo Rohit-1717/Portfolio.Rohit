@@ -22,6 +22,19 @@ const addOrUpdateSkill = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Skills must be arrays.");
   }
 
+  // Validate items in the arrays
+  const validateSkillItem = (items) => {
+    return items.every((item) => item && typeof item.name === "string");
+  };
+
+  if (
+    !validateSkillItem(frontend) ||
+    !validateSkillItem(backend) ||
+    !validateSkillItem(softSkills)
+  ) {
+    throw new ApiError(400, "Each skill must have a 'name' field.");
+  }
+
   // Find or create skill entry for the user
   let skillEntry = await Skill.findOne({ user: userId });
 
@@ -47,7 +60,7 @@ const addOrUpdateSkill = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, skillEntry, "Skills updated successfully."));
 });
 
-// Fetch all skills for a user
+// Fetch all skills for a user (Requires authentication)
 const fetchSkills = asyncHandler(async (req, res) => {
   const userId = req.user?.id; // Extract userId from req.user
 
@@ -66,4 +79,17 @@ const fetchSkills = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, skillEntry, "Skills fetched successfully."));
 });
 
-export { addOrUpdateSkill, fetchSkills };
+// Fetch skills without authentication
+const fetchSkillsWithoutAuth = asyncHandler(async (req, res) => {
+  const skillEntries = await Skill.find().populate("user", "name");
+
+  if (!skillEntries || skillEntries.length === 0) {
+    throw new ApiError(404, "No skills found.");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, skillEntries, "Skills fetched successfully."));
+});
+
+export { addOrUpdateSkill, fetchSkills, fetchSkillsWithoutAuth };

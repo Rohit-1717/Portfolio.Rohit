@@ -12,6 +12,7 @@ import {
 import {
   addOrUpdateSkill,
   fetchSkills,
+  fetchSkillsWithoutAuth,
 } from "../controllers/skills.controller.js";
 
 import { updateAbout, fetchAbout } from "../controllers/about.controller.js";
@@ -19,12 +20,13 @@ import { updateAbout, fetchAbout } from "../controllers/about.controller.js";
 import {
   uploadProfileImage,
   fetchProfileImage,
-  fetchProfileImageWithoutAuth
+  fetchProfileImageWithoutAuth,
 } from "../controllers/profileImage.controller.js";
 
 import {
   addOrUpdateProject,
   fetchProjects,
+  fetchProjectsWithoutAuth,
 } from "../controllers/project.controller.js";
 
 const router = Router();
@@ -55,13 +57,11 @@ router.get("/profile-image", fetchProfileImageWithoutAuth);
 // Skills routes
 router.put("/dashboard/skills", addOrUpdateSkill);
 router.get("/dashboard/skills", fetchSkills);
+router.get("/skills", fetchSkillsWithoutAuth);
 
 // Projects routes
-router.put(
-  "/dashboard/projects",
-  upload.single("profileImage"),
-  addOrUpdateProject
-);
+router.put("/dashboard/projects", upload.single("image"), addOrUpdateProject);
 router.get("/dashboard/projects", fetchProjects);
+router.get("/projects", fetchProjectsWithoutAuth);
 
 export default router;

@@ -21,7 +21,7 @@ const projectSchema = new Schema(
       type: String,
       required: false,
     },
-    technologies: [String],
+
     image: {
       type: String,
       required: true,

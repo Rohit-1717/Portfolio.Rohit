@@ -65,9 +65,9 @@ const addOrUpdateProject = asyncHandler(async (req, res) => {
   await project.save();
 
   res
-    .status(201)
+    .status(200) // Updated status code to 200 (success) instead of 201 (created)
     .json(
-      new ApiResponse(201, project, "Project added or updated successfully.")
+      new ApiResponse(200, project, "Project added or updated successfully.")
     );
 });
 
@@ -90,4 +90,17 @@ const fetchProjects = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, projects, "Projects fetched successfully."));
 });
 
-export { addOrUpdateProject, fetchProjects };
+// Fetch all projects without authentication
+const fetchProjectsWithoutAuth = asyncHandler(async (req, res) => {
+  try {
+    const projects = await Project.find();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, projects, "Projects fetched successfully."));
+  } catch (error) {
+    res.status(500).json(new ApiError(500, error.message));
+  }
+});
+
+export { addOrUpdateProject, fetchProjects, fetchProjectsWithoutAuth };
