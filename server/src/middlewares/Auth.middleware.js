@@ -1,69 +1,48 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import jwt from "jsonwebtoken";
+import { verifyAccessToken } from "../utils/tokenUtils.js";
 
-// Todo Verifying Admin
-
-export const verifyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      throw new ApiError(401, "Unauthorized request.");
+      throw new ApiError(401, "Unauthorized request. Token is missing.");
     }
 
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (typeof token !== "string" || token.trim() === "") {
+      throw new ApiError(401, "Invalid token format.");
+    }
+
+    const decodedToken = verifyAccessToken(token);
+
+    if (!decodedToken || !decodedToken.id) {
+      throw new ApiError(401, "Invalid token payload.");
+    }
 
     const user = await User.findById(decodedToken.id).select(
       "-password -refreshToken"
     );
 
     if (!user) {
-      throw new ApiError(401, "Invalid Access Token");
+      throw new ApiError(401, "User not found or invalid access token.");
     }
 
-    req.user = user; // Attach user to request
+    req.user = user; // Corrected here
     next();
   } catch (error) {
-    console.error("JWT Verification Error:", error.message);
-
-    if (error.name === "TokenExpiredError") {
-      throw new ApiError(401, "Token has expired.");
+    console.error("Error verifying access token:", error);
+    if (error instanceof ApiError) {
+      throw error;
+    } else if (error.name === "TokenExpiredError") {
+      throw new ApiError(401, "Access token has expired.");
     } else if (error.name === "JsonWebTokenError") {
-      throw new ApiError(401, "Invalid token.");
+      throw new ApiError(401, "Invalid access token.");
     } else {
-      throw new ApiError(401, error.message || "Invalid access token.");
+      throw new ApiError(401, "Authentication failed.");
     }
-  }
-});
-
-// Todo isLoggedIn
-export const isLoggedIn = asyncHandler(async (req, _, next) => {
-  try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer", "");
-
-    if (!token) {
-      throw new ApiError(401, "Unauthorized request.");
-    }
-
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    const user = await User.findById(decodedToken._id).select(
-      "-password -refreshToken"
-    );
-
-    if (!user) {
-      throw new ApiError(401, "Invalid Access Token");
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid access token.");
   }
 });

@@ -132,16 +132,22 @@ const loginUser = asyncHandler(async (req, res) => {
   // Set cookies
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: parseInt(process.env.ACCESS_TOKEN_EXPIRY) * 1000, // convert to milliseconds
+    expires: new Date(
+      Date.now() + parseInt(process.env.ACCESS_TOKEN_EXPIRY) * 1000
+    ), // convert to milliseconds
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "strict",
-    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+    maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRY) * 1000, // convert to milliseconds
+    expires: new Date(
+      Date.now() + parseInt(process.env.REFRESH_TOKEN_EXPIRY) * 1000
+    ), // convert to milliseconds
   });
 
   // Send response
@@ -247,6 +253,10 @@ const resetPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Token and password are required.");
   }
 
+  if (password.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters long.");
+  }
+
   const resetTokenHash = crypto
     .createHash("sha256")
     .update(token)
@@ -271,7 +281,6 @@ const resetPassword = asyncHandler(async (req, res) => {
       message: "Password reset successful.",
     });
   } catch (error) {
-    // Handle errors in updating user password
     console.error("Error resetting password:", error);
     throw new ApiError(
       500,

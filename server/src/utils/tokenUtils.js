@@ -1,9 +1,15 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { ApiError } from "./ApiError.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Generate Access Token
 const generateAccessToken = (userId) => {
+  if (!userId) {
+    throw new ApiError(400, "User ID is required.");
+  }
+
   return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
   });
@@ -11,6 +17,10 @@ const generateAccessToken = (userId) => {
 
 // Generate Refresh Token
 const generateRefreshToken = (userId) => {
+  if (!userId) {
+    throw new ApiError(400, "User ID is required.");
+  }
+
   return jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
   });
@@ -33,6 +43,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
     return { accessToken, refreshToken };
   } catch (error) {
+    console.error("Error generating tokens:", error);
     throw new ApiError(500, "Failed to generate tokens.");
   }
 };
@@ -42,6 +53,7 @@ const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
   } catch (error) {
+    console.error("Error verifying access token:", error);
     throw new ApiError(401, "Invalid or expired access token.");
   }
 };
@@ -58,6 +70,7 @@ const verifyRefreshToken = async (token) => {
 
     return user;
   } catch (error) {
+    console.error("Error verifying refresh token:", error);
     throw new ApiError(401, "Invalid or expired refresh token.");
   }
 };

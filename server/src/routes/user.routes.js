@@ -19,6 +19,7 @@ import { updateAbout, fetchAbout } from "../controllers/about.controller.js";
 import {
   uploadProfileImage,
   fetchProfileImage,
+  fetchProfileImageWithoutAuth
 } from "../controllers/profileImage.controller.js";
 
 import {
@@ -49,6 +50,7 @@ router.put(
   uploadProfileImage
 );
 router.get("/dashboard/profile-image", fetchProfileImage);
+router.get("/profile-image", fetchProfileImageWithoutAuth);
 
 // Skills routes
 router.put("/dashboard/skills", addOrUpdateSkill);
@@ -57,7 +59,7 @@ router.get("/dashboard/skills", fetchSkills);
 // Projects routes
 router.put(
   "/dashboard/projects",
-  upload.single("image"), // The field name for the file should match the one used in the form-data request
+  upload.single("profileImage"),
   addOrUpdateProject
 );
 router.get("/dashboard/projects", fetchProjects);

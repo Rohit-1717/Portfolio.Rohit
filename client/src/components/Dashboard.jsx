@@ -1,188 +1,139 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { uploadProfileImage } from "../slices/profileSlice";
-import { updateSkills, fetchSkills } from "../slices/skillsSlice";
-import { updateProjects, fetchProjects } from "../slices/projectsSlice";
-import { updateAbout, fetchAbout } from "../slices/aboutSlice";
+import { useNavigate } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
+import { logoutUser } from "../slices/authSlice";
+import { uploadProfileImage, fetchProfileImage } from "../slices/profileSlice";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const skills = useSelector((state) => state.skills.data) || []; // Default to empty array if null
-  const projects = useSelector((state) => state.projects.data) || []; // Default to empty array if null
-  const about = useSelector((state) => state.about.data) || {}; // Default to empty object if null
-  const [profileImage, setProfileImage] = useState(null);
-  const [newSkill, setNewSkill] = useState("");
-  const [newProject, setNewProject] = useState({
-    title: "",
-    description: "",
-    image: null,
-  });
-  const [myStory, setMyStory] = useState(about.story || ""); // Default to empty string if null or undefined
+  const navigate = useNavigate();
+  const {
+    image,
+    status: profileStatus,
+    error: profileError,
+  } = useSelector((state) => state.profile);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchSkills());
-    dispatch(fetchProjects());
-    dispatch(fetchAbout());
+    dispatch(fetchProfileImage());
   }, [dispatch]);
 
-  const handleProfileImageUpload = () => {
-    if (profileImage) {
-      const formData = new FormData();
-      formData.append("image", profileImage);
-      dispatch(uploadProfileImage(formData));
-    }
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate("/");
   };
 
-  const handleAddSkill = () => {
-    if (newSkill) {
-      dispatch(updateSkills({ skill: newSkill }));
-      setNewSkill("");
-    }
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
   };
 
-  const handleAddProject = () => {
-    if (newProject.title && newProject.description) {
-      const formData = new FormData();
-      formData.append("title", newProject.title);
-      formData.append("description", newProject.description);
-      if (newProject.image) formData.append("image", newProject.image);
-      dispatch(updateProjects(formData));
-      setNewProject({ title: "", description: "", image: null });
-    }
-  };
+  const handleUpload = async () => {
+    if (!selectedFile) return;
 
-  const handleAboutUpdate = () => {
-    dispatch(updateAbout({ story: myStory }));
+    const formData = new FormData();
+    formData.append("profileImage", selectedFile);
+
+    try {
+      await dispatch(uploadProfileImage(formData)).unwrap();
+      setSelectedFile(null); // Clear the selected file after upload
+    } catch (error) {
+      console.error("Failed to upload profile image", error);
+    }
   };
 
   return (
     <>
       <Nav />
-      <div className="p-4 sm:p-6 lg:p-8">
-        <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+      <div className="relative p-4 sm:p-6 lg:p-8 font-['Montserrat']">
+        {/* Logout Button */}
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-3 py-1.5 rounded shadow-md text-sm sm:text-base"
+          >
+            Logout
+          </button>
+        </div>
+
+        <h2 className="text-2xl font-bold mb-4 text-[#6E06F2]">Dashboard</h2>
+        <p className="text-lg mb-6">
+          Welcome, <span className="text-[#6E06F2] font-semibold">Rohit</span>!
+        </p>
 
         {/* Profile Image */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
           <h3 className="text-xl font-semibold mb-2">Profile Image</h3>
-          <input
-            type="file"
-            onChange={(e) => setProfileImage(e.target.files[0])}
-            className="mb-2 w-full"
-          />
+          <div className="bg-gray-200 h-32 w-32 rounded-full mx-auto mb-4 shadow-lg ring-2 ring-blue-500">
+            <img
+              src={image || "https://via.placeholder.com/128"}
+              alt="Profile"
+              className="w-full h-full object-cover object-center rounded-full"
+            />
+          </div>
+          <input type="file" onChange={handleFileChange} className="mb-2" />
           <button
-            onClick={handleProfileImageUpload}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={handleUpload}
+            className="bg-blue-500 text-white px-4 py-2 rounded shadow-md"
           >
             Upload Profile Image
           </button>
+          {profileStatus === "loading" && <p>Uploading...</p>}
+          {profileError && <p className="text-red-500">{profileError}</p>}
         </div>
 
-        {/* Skills */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-          <h3 className="text-xl font-semibold mb-2">Skills</h3>
-          <select
-            onChange={(e) => setNewSkill(e.target.value)}
-            className="border p-2 rounded mb-2 w-full"
-          >
-            <option value="">Select Skill Type</option>
-            <option value="frontend">Frontend</option>
-            <option value="backend">Backend</option>
-            <option value="softskills">Soft Skills</option>
-          </select>
-          <input
-            type="text"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            placeholder="Enter new skill"
-            className="border p-2 rounded mb-2 w-full"
-          />
-          <button
-            onClick={handleAddSkill}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Add Skill
-          </button>
-          <ul className="mt-4">
-            {skills.length > 0 ? (
-              skills.map((skill, index) => (
-                <li key={index} className="bg-gray-100 p-2 rounded mb-1">
-                  {skill}
-                </li>
-              ))
-            ) : (
-              <li>No skills available</li>
-            )}
-          </ul>
-        </div>
-
-        {/* Projects */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        {/* Projects Section */}
+        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
           <h3 className="text-xl font-semibold mb-2">Projects</h3>
           <input
             type="text"
-            value={newProject.title}
-            onChange={(e) =>
-              setNewProject({ ...newProject, title: e.target.value })
-            }
+            disabled
             placeholder="Project Title"
-            className="border p-2 rounded mb-2 w-full"
+            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
           />
           <textarea
-            value={newProject.description}
-            onChange={(e) =>
-              setNewProject({ ...newProject, description: e.target.value })
-            }
+            disabled
             placeholder="Project Description"
-            className="border p-2 rounded mb-2 w-full"
+            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
           />
           <input
             type="file"
-            onChange={(e) =>
-              setNewProject({ ...newProject, image: e.target.files[0] })
-            }
-            className="mb-2 w-full"
+            disabled
+            className="mb-2 w-full bg-gray-100 cursor-not-allowed"
           />
           <button
-            onClick={handleAddProject}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            disabled
+            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
           >
             Add Project
           </button>
           <div className="mt-4">
-            {projects.length > 0 ? (
-              projects.map((project, index) => (
-                <div key={index} className="bg-gray-100 p-4 rounded mb-4">
-                  <h4 className="text-lg font-semibold">{project.title}</h4>
-                  <p>{project.description}</p>
-                  {project.imageUrl && (
-                    <img
-                      src={project.imageUrl}
-                      alt={project.title}
-                      className="w-full h-auto"
-                    />
-                  )}
-                </div>
-              ))
-            ) : (
-              <p>No projects available</p>
-            )}
+            <div className="bg-gray-100 p-4 rounded mb-4 shadow-lg">
+              <h4 className="text-lg font-semibold mb-2">
+                Example Project Title
+              </h4>
+              <p className="mb-2">Example project description.</p>
+              <img
+                src="https://via.placeholder.com/300x200"
+                alt="Example Project"
+                className="w-full h-48 object-cover rounded"
+              />
+            </div>
           </div>
         </div>
 
         {/* About Section */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
           <h3 className="text-xl font-semibold mb-2">About Me</h3>
           <textarea
-            value={myStory}
-            onChange={(e) => setMyStory(e.target.value)}
+            disabled
             placeholder="Tell your story"
-            className="border p-2 rounded mb-2 w-full"
+            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
           />
           <button
-            onClick={handleAboutUpdate}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            disabled
+            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
           >
             Update About Me
           </button>

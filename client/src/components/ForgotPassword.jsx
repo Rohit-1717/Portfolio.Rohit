@@ -1,23 +1,30 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate, NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
-import { loginUser } from "../slices/authSlice";
 import Nav from "./Nav";
 import Footer from "./Footer";
+import { forgotPassword } from "../slices/authSlice"; // Assuming you have this action in authSlice
 
-function Login() {
+function ForgotPassword() {
   const [formData, setFormData] = useState({
-    username: "",
-    password: "",
+    email: "",
+    captchaInput: "",
   });
 
-  const [errors, setErrors] = useState({});
-
-  const { username, password } = formData;
+  const [captcha, setCaptcha] = useState("");
+  const { email, captchaInput } = formData;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { error, status } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  const generateCaptcha = () => {
+    const randomCaptcha = Math.random().toString(36).substr(2, 6);
+    setCaptcha(randomCaptcha.toUpperCase());
+  };
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,55 +33,38 @@ function Login() {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    // Clear previous errors
-    setErrors({});
-
-    // Frontend validation
-    if (!username && !password) {
-      toast.error("Username and password are required.");
+    if (!email) {
+      toast.error("Email is required.");
       return;
     }
 
-    if (!username) {
-      toast.error("Username is required.");
+    if (!captchaInput) {
+      toast.error("CAPTCHA is required.");
       return;
     }
 
-    if (!password) {
-      toast.error("Password is required.");
+    if (captchaInput.toUpperCase() !== captcha) {
+      toast.error("CAPTCHA is incorrect.");
+      generateCaptcha(); // Regenerate CAPTCHA on error
       return;
     }
 
     try {
-      const resultAction = await dispatch(loginUser({ username, password }));
+      const resultAction = await dispatch(forgotPassword({ email }));
 
-      if (loginUser.fulfilled.match(resultAction)) {
-        // Debug: Check the resultAction payload
-        console.log("Login successful. Payload:", resultAction.payload);
-
-        // Store the token in session storage
-        localStorage.setItem("token", resultAction.payload.token);
-
-        toast.success("Login successful!");
-        navigate("/admin/dashboard");
+      if (forgotPassword.fulfilled.match(resultAction)) {
+        toast.success("Password reset instructions sent to your email.");
+        navigate("/login");
       } else {
-        // Handle server-side errors from Redux
         const serverErrors = resultAction.payload?.errors || {};
 
-        if (serverErrors.username) {
-          toast.error(serverErrors.username);
-        }
-
-        if (serverErrors.password) {
-          toast.error(serverErrors.password);
-        }
-
-        if (!serverErrors.username && !serverErrors.password) {
-          toast.error("Failed to login. Please try again.");
+        if (serverErrors.email) {
+          toast.error(serverErrors.email);
+        } else {
+          toast.error("Failed to reset password. Please try again.");
         }
       }
     } catch (err) {
-      // Handle unexpected errors
       toast.error("An unexpected error occurred. Please try again.");
     }
   };
@@ -84,47 +74,59 @@ function Login() {
       <Nav />
       <section className="px-6 mt-10 mb-16">
         <div className="w-full max-w-sm p-6 m-auto bg-[#FCFCFD] rounded-lg border-2 border-[#C399F9] shadow-md">
-          <div className="flex justify-center items-center mx-auto w-[18vw] h-[18vw] md:w-[10vw] md:h-[10vw] lg:w-[5vw] lg:h-[5vw] rounded-full border-2 border-[#C399F9]">
+          <div className="flex justify-center items-center mx-auto w-[18vw] h-[18vw] md:w-[10vw] md:h-[10vw] lg:w-[5vw] lg:h-[5vw] rounded-full border-2 border-[#C399F9] overflow-hidden">
             <img
               className="w-auto h-10 sm:h-8 lg:h-[3.5vw] lg:w-[3.5vw] md:h-[6.5vw] md:w-[6.5vw]"
-              src="https://res.cloudinary.com/rohitcloudinary/image/upload/v1721224336/My%20Portfolio%20Website%20Assets/cam4pfycuoha5sno1rus.gif"
-              alt="Admin Login"
+              src="https://res.cloudinary.com/rohitcloudinary/image/upload/v1722588427/My%20Portfolio%20Website%20Assets/zrk2kgnbgtmlzxas5mvn.gif"
+              alt="Forgot Password"
             />
           </div>
           <div className="text-center font-['Montserrat']">
-            <h1 className="font-semibold md:text-xl">Admin Login</h1>
+            <h1 className="font-semibold md:text-xl">Forgot Password</h1>
           </div>
           <form className="mt-6" onSubmit={onSubmit}>
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm text-gray-800 font-['Montserrat'] md:text-xl"
               >
-                Username
+                Email
               </label>
               <input
-                type="text"
-                name="username"
-                value={username}
+                type="email"
+                name="email"
+                value={email}
                 onChange={onChange}
-                placeholder="Enter Username"
+                placeholder="Enter your Email"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
             </div>
 
             <div className="mt-4">
               <label
-                htmlFor="password"
+                htmlFor="captcha"
                 className="block text-sm text-gray-800 font-['Montserrat'] md:text-xl"
               >
-                Password
+                CAPTCHA
               </label>
+              <div className="flex items-center mt-2">
+                <div className="px-4 py-2 bg-gray-200 border rounded-lg text-xl font-mono select-none">
+                  {captcha}
+                </div>
+                <button
+                  type="button"
+                  onClick={generateCaptcha}
+                  className="ml-4 px-3 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
+                >
+                  Refresh
+                </button>
+              </div>
               <input
-                type="password"
-                name="password"
-                value={password}
+                type="text"
+                name="captchaInput"
+                value={captchaInput}
                 onChange={onChange}
-                placeholder="Enter Password"
+                placeholder="Enter CAPTCHA"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 md:text-xl"
               />
             </div>
@@ -134,29 +136,19 @@ function Login() {
                 type="submit"
                 className="w-full px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50 md:text-xl"
               >
-                Log In
+                Reset Password
               </button>
             </div>
 
             <p className="mt-2 text-sm text-center text-gray-400 md:text-xl">
               <NavLink
-                to="/forgot-password"
+                to="/login"
                 className="font-medium text-gray-700 hover:underline"
               >
-                Forgot Password?
+                Remembered your password? Log in
               </NavLink>
             </p>
           </form>
-
-          <p className="mt-8 text-sm font-light text-center text-gray-400 md:text-xl">
-            Don't have an account?{" "}
-            <NavLink
-              to="/register"
-              className="font-medium text-gray-700 hover:underline"
-            >
-              Create One
-            </NavLink>
-          </p>
         </div>
       </section>
       <Footer />
@@ -164,4 +156,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ForgotPassword;

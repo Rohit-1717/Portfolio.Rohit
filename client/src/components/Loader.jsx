@@ -13,7 +13,7 @@ function Loader() {
         className="h-full w-full object-cover object-center"
         src="https://res.cloudinary.com/rohitcloudinary/image/upload/v1722551199/My%20Portfolio%20Website%20Assets/bsjiytjdue0vv7sb9ozq.avif"
         alt=""
-      /> */}
+      />  */}
       <div className="flex items-center justify-center  flex-col lg:absolute ">
         <img
           src="https://res.cloudinary.com/rohitcloudinary/image/upload/v1720439170/My%20Portfolio%20Website%20Assets/oixzuhp8nxj9ld8tkpdd.svg"
