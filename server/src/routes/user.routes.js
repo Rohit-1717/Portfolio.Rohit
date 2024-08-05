@@ -10,12 +10,18 @@ import {
 } from "../controllers/user.controller.js";
 
 import {
-  addOrUpdateSkill,
+  addSkill,
+  removeSkill,
+  addCategory,
   fetchSkills,
-  fetchSkillsWithoutAuth,
+  fetchCategories,
 } from "../controllers/skills.controller.js";
 
-import { updateAbout, fetchAbout } from "../controllers/about.controller.js";
+import {
+  updateAbout,
+  fetchAbout,
+  fetchAboutWithoutAuth,
+} from "../controllers/about.controller.js";
 
 import {
   uploadProfileImage,
@@ -31,37 +37,46 @@ import {
 
 const router = Router();
 
-// User Routes
+// Public routes
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/logout", logoutUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
-// Dashboard Routes (Protected routes)
+// Public data fetch routes
+router.get("/story", fetchAboutWithoutAuth);
+router.get("/skills", fetchSkills);
+router.get("/categories", fetchCategories);
+router.get("/profile-image", fetchProfileImageWithoutAuth);
+router.get("/projects", fetchProjectsWithoutAuth);
+
+// Protected routes
 router.use("/dashboard", verifyJWT);
 
-// About section routes
-router.put("/dashboard/about", updateAbout);
-router.get("/dashboard/about", fetchAbout);
+// User routes
+router.post("/logout", logoutUser);
 
+// About section routes
+router.put("/dashboard/story", updateAbout);
+router.get("/dashboard/story", fetchAbout);
+router.get("/story", fetchAboutWithoutAuth);
 // Profile image routes
 router.put(
-  "/dashboard/profile-image/upload",
+  "/dashboard/profile-image",
   upload.single("profileImage"),
   uploadProfileImage
 );
 router.get("/dashboard/profile-image", fetchProfileImage);
-router.get("/profile-image", fetchProfileImageWithoutAuth);
 
 // Skills routes
-router.put("/dashboard/skills", addOrUpdateSkill);
+router.post("/dashboard/skills", addSkill);
+router.delete("/dashboard/skills/:id", removeSkill);
+router.post("/dashboard/categories", addCategory);
 router.get("/dashboard/skills", fetchSkills);
-router.get("/skills", fetchSkillsWithoutAuth);
+router.get("/dashboard/categories", fetchCategories);
 
 // Projects routes
 router.put("/dashboard/projects", upload.single("image"), addOrUpdateProject);
 router.get("/dashboard/projects", fetchProjects);
-router.get("/projects", fetchProjectsWithoutAuth);
 
 export default router;

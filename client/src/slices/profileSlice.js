@@ -7,7 +7,7 @@ export const uploadProfileImage = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.put(
-        "dashboard/profile-image/upload",
+        "dashboard/profile-image",
         formData,
         {
           headers: {

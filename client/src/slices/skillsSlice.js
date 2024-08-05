@@ -1,75 +1,71 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../axiosConfig";
 
-// Fetch skills (authenticated)
-export const fetchSkills = createAsyncThunk("skills/fetchSkills", async () => {
-  const response = await axiosInstance.get("dashboard/skills"); // Authenticated endpoint
-  return response.data.data; // Assuming your API response structure is { data: { data: ... } }
-});
-
-// Fetch skills without authentication
-export const fetchSkillsWithoutAuth = createAsyncThunk(
-  "skills/fetchSkillsWithoutAuth",
-  async () => {
-    const response = await axiosInstance.get("skills"); // Public endpoint
-    return response.data.data; // Assuming your API response structure is { data: { data: ... } }
+// Define the thunk to fetch story without authentication
+export const fetchMyStoryWithoutAuth = createAsyncThunk(
+  "about/fetchMyStoryWithoutAuth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/story"); // Ensure the endpoint is correct
+      return response.data.story || ""; // Adjust if the structure is different
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch story"
+      );
+    }
   }
 );
 
-// Update skills (authenticated)
-export const updateSkills = createAsyncThunk(
-  "skills/updateSkills",
-  async (skillData) => {
-    const response = await axiosInstance.put("dashboard/skills", skillData); // Authenticated endpoint
-    return response.data.data; // Assuming your API response structure is { data: { data: ... } }
+// Define the thunk to update the story
+export const updateStory = createAsyncThunk(
+  "about/updateStory",
+  async (storyData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put("/story", storyData); // Ensure the endpoint is correct
+      return response.data.story || ""; // Adjust if the structure is different
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update story"
+      );
+    }
   }
 );
 
-// Define the skills slice
-const skillsSlice = createSlice({
-  name: "skills",
+// Create the slice
+const aboutSlice = createSlice({
+  name: "about",
   initialState: {
-    data: null,
-    status: "idle",
-    error: null,
+    story: "", // Initialize with an empty string
+    status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+    error: null, // Error state
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSkills.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchMyStoryWithoutAuth.pending, (state) => {
+        state.status = "loading"; // Set loading state
+        state.error = null; // Clear any previous errors
       })
-      .addCase(fetchSkills.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.data = action.payload;
+      .addCase(fetchMyStoryWithoutAuth.fulfilled, (state, action) => {
+        state.status = "succeeded"; // Set succeeded state
+        state.story = action.payload; // Update story with the fetched data
       })
-      .addCase(fetchSkills.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
+      .addCase(fetchMyStoryWithoutAuth.rejected, (state, action) => {
+        state.status = "failed"; // Set failed state
+        state.error = action.payload; // Set error message
       })
-      .addCase(fetchSkillsWithoutAuth.pending, (state) => {
-        state.status = "loading";
+      .addCase(updateStory.pending, (state) => {
+        state.status = "loading"; // Set loading state
+        state.error = null; // Clear any previous errors
       })
-      .addCase(fetchSkillsWithoutAuth.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.data = action.payload;
+      .addCase(updateStory.fulfilled, (state, action) => {
+        state.status = "succeeded"; // Set succeeded state
+        state.story = action.payload; // Update story with the updated data
       })
-      .addCase(fetchSkillsWithoutAuth.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
-      })
-      .addCase(updateSkills.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(updateSkills.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.data = action.payload;
-      })
-      .addCase(updateSkills.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
+      .addCase(updateStory.rejected, (state, action) => {
+        state.status = "failed"; // Set failed state
+        state.error = action.payload; // Set error message
       });
   },
 });
 
-export default skillsSlice.reducer;
+export default aboutSlice.reducer;

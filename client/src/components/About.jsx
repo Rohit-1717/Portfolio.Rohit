@@ -1,118 +1,88 @@
-import React from "react";
-import Nav from "../components/Nav";
-import Footer from "../components/Footer";
+// About.js
 
-const Dashboard = () => {
-  const userName = "John Doe"; // Replace with the actual user's name from your state or context
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyStoryWithoutAuth } from "../slices/aboutSlice";
+import Nav from "./Nav";
+import Footer from "./Footer";
+
+function About() {
+  const dispatch = useDispatch();
+  const { story, status, error } = useSelector((state) => state.about);
+
+  useEffect(() => {
+    dispatch(fetchMyStoryWithoutAuth());
+  }, [dispatch]);
+
+  const details = {
+    id1: {
+      title: "My Stack.",
+      image:
+        "https://images.unsplash.com/photo-1436397543931-01c4a5162bdb?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    id2: {
+      title: "My Special Place.",
+      image:
+        "https://images.unsplash.com/photo-1469532844423-7e9107f9a96f?q=80&w=1479&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  };
 
   return (
     <>
       <Nav />
-      <div className="p-4 sm:p-6 lg:p-8 font-['Montserrat']">
-        <h2 className="text-2xl font-bold mb-4 text-[#6E06F2]">Dashboard</h2>
-        <p className="text-lg mb-6">
-          Welcome, <span className="text-[#6E06F2]">{userName}</span>!
-        </p>
-
-        {/* Profile Image */}
-        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
-          <h3 className="text-xl font-semibold mb-2">Profile Image</h3>
-          <div className="bg-gray-200 h-32 w-32 rounded-full mx-auto mb-4 border-4 border-[#6E06F2] shadow-lg"></div>
-          <button
-            disabled
-            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
-          >
-            Upload Profile Image
-          </button>
+      <div className="w-full bg-[#FCFCFD] px-6">
+        <div className="pr-8 pt-20">
+          <h1 className="pb-5 text-6xl font-extrabold text-[#24262F] font-['Montserrat'] lg:text-7xl lg:font-extrabold md:text-6xl">
+            About me
+            <span className="text-5xl h-fit w-fit text-[#6E06F2]">.</span>
+          </h1>
         </div>
 
-        {/* Skills */}
-        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
-          <h3 className="text-xl font-semibold mb-2">Skills</h3>
-          <select
-            disabled
-            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
-          >
-            <option>Select Skill Type</option>
-            <option>Frontend</option>
-            <option>Backend</option>
-            <option>Soft Skills</option>
-          </select>
-          <input
-            type="text"
-            disabled
-            placeholder="Enter new skill"
-            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
-          />
-          <button
-            disabled
-            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
-          >
-            Add Skill
-          </button>
-          <ul className="mt-4">
-            <li className="bg-gray-100 p-2 rounded mb-1">Example Skill 1</li>
-            <li className="bg-gray-100 p-2 rounded mb-1">Example Skill 2</li>
-          </ul>
-        </div>
-
-        {/* Projects */}
-        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
-          <h3 className="text-xl font-semibold mb-2">Projects</h3>
-          <input
-            type="text"
-            disabled
-            placeholder="Project Title"
-            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
-          />
-          <textarea
-            disabled
-            placeholder="Project Description"
-            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
-          />
-          <input
-            type="file"
-            disabled
-            className="mb-2 w-full bg-gray-100 cursor-not-allowed"
-          />
-          <button
-            disabled
-            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
-          >
-            Add Project
-          </button>
-          <div className="mt-4">
-            <div className="bg-gray-100 p-4 rounded mb-4 shadow-lg">
-              <h4 className="text-lg font-semibold">Example Project Title</h4>
-              <p>Example project description.</p>
-              <img
-                src="https://via.placeholder.com/300x200"
-                alt="Example Project"
-                className="w-full h-auto mt-2 rounded"
-              />
-            </div>
+        <div className="h-36 w-full flex gap-2 md:h-16 lg:w-[90vw]">
+          <div className="w-5 h-full bg-[#6E06F2] md:w-3 lg:w-3"></div>
+          <div className="text-[#4E525A] text-xl md:text-2xl">
+            <p>
+              Developing beautiful and functional websites is what I love doing,
+              and that's why I give my all in every new challenge.
+            </p>
           </div>
         </div>
 
-        {/* About Section */}
-        <div className="bg-white p-4 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold mb-2">About Me</h3>
-          <textarea
-            disabled
-            placeholder="Tell your story"
-            className="border p-2 rounded mb-2 w-full bg-gray-100 cursor-not-allowed"
-          />
-          <button
-            disabled
-            className="bg-blue-500 text-white px-4 py-2 rounded cursor-not-allowed shadow-md"
-          >
-            Update About Me
-          </button>
-        </div>
+        {Object.keys(details).map((key) => {
+          const item = details[key];
+          return (
+            <div key={key}>
+              <div className="w-full text-xl font-['Montserrat'] font-bold mt-14 pb-4 md:text-3xl">
+                <h2>{item.title}</h2>
+              </div>
+              <div className="h-[70vw] w-full bg-green-300 flex items-center justify-center rounded-md mb-4 overflow-hidden md:h-[40vw] lg:h-[30vw]">
+                <img src={item.image} alt={item.title} />
+              </div>
+            </div>
+          );
+        })}
+
+        <section>
+          <h1 className="text-4xl mt-9 font-extrabold text-[#24262F] font-['Montserrat'] lg:text-7xl lg:font-extrabold md:text-5xl">
+            My Story
+            <span className="text-5xl h-fit w-fit text-[#6E06F2]">.</span>
+          </h1>
+
+          {status === "loading" && <p>Loading...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {status === "succeeded" && story && (
+            <p className="text-[#24262F] font-['Montserrat'] pt-3 text-lg mb-8 md:text-xl">
+              {story}
+            </p>
+          )}
+          {status === "idle" && !story && (
+            <p className="text-gray-500">No story available.</p>
+          )}
+        </section>
       </div>
       <Footer />
     </>
   );
-};
+}
 
-export default Dashboard;
+export default About;

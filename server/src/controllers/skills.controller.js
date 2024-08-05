@@ -1,95 +1,73 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Skill } from "../models/skills.modal.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Skill,Category} from "../models/skills.modal.js";
+export const addSkill = asyncHandler(async (req, res) => {
+  const { name, categoryId } = req.body;
 
-// Add or update skill
-const addOrUpdateSkill = asyncHandler(async (req, res) => {
-  const userId = req.user?.id; // Extract userId from req.user
-
-  if (!userId) {
-    throw new ApiError(401, "User ID is required.");
+  if (!name || !categoryId) {
+    throw new ApiError(400, "Name and category ID are required");
   }
 
-  const { frontend, backend, softSkills } = req.body;
-
-  // Validate required fields
-  if (
-    !Array.isArray(frontend) ||
-    !Array.isArray(backend) ||
-    !Array.isArray(softSkills)
-  ) {
-    throw new ApiError(400, "Skills must be arrays.");
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    throw new ApiError(404, "Category not found");
   }
 
-  // Validate items in the arrays
-  const validateSkillItem = (items) => {
-    return items.every((item) => item && typeof item.name === "string");
-  };
+  const skill = await Skill.create({ name, category: categoryId });
 
-  if (
-    !validateSkillItem(frontend) ||
-    !validateSkillItem(backend) ||
-    !validateSkillItem(softSkills)
-  ) {
-    throw new ApiError(400, "Each skill must have a 'name' field.");
-  }
-
-  // Find or create skill entry for the user
-  let skillEntry = await Skill.findOne({ user: userId });
-
-  if (skillEntry) {
-    // Update existing skill entry
-    skillEntry.frontend = frontend;
-    skillEntry.backend = backend;
-    skillEntry.softSkills = softSkills;
-  } else {
-    // Create a new skill entry
-    skillEntry = new Skill({
-      user: userId,
-      frontend,
-      backend,
-      softSkills,
-    });
-  }
-
-  await skillEntry.save();
-
-  res
-    .status(200)
-    .json(new ApiResponse(200, skillEntry, "Skills updated successfully."));
+  return res
+    .status(201)
+    .json(new ApiResponse(201, skill, "Skill added successfully"));
 });
 
-// Fetch all skills for a user (Requires authentication)
-const fetchSkills = asyncHandler(async (req, res) => {
-  const userId = req.user?.id; // Extract userId from req.user
+export const removeSkill = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-  if (!userId) {
-    throw new ApiError(401, "User ID is required.");
+  const skill = await Skill.findByIdAndDelete(id);
+
+  if (!skill) {
+    throw new ApiError(404, "Skill not found");
   }
 
-  const skillEntry = await Skill.findOne({ user: userId });
-
-  if (!skillEntry) {
-    throw new ApiError(404, "Skills not found for this user.");
-  }
-
-  res
+  return res
     .status(200)
-    .json(new ApiResponse(200, skillEntry, "Skills fetched successfully."));
+    .json(new ApiResponse(200, null, "Skill removed successfully"));
 });
 
-// Fetch skills without authentication
-const fetchSkillsWithoutAuth = asyncHandler(async (req, res) => {
-  const skillEntries = await Skill.find().populate("user", "name");
+export const addCategory = asyncHandler(async (req, res) => {
+  const { name } = req.body;
 
-  if (!skillEntries || skillEntries.length === 0) {
-    throw new ApiError(404, "No skills found.");
+  if (!name) {
+    throw new ApiError(400, "Category name is required");
   }
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, skillEntries, "Skills fetched successfully."));
+  const category = await Category.create({ name });
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, category, "Category added successfully"));
 });
 
-export { addOrUpdateSkill, fetchSkills, fetchSkillsWithoutAuth };
+export const fetchSkills = asyncHandler(async (req, res) => {
+  const { categoryId } = req.query;
+
+  let query = {};
+  if (categoryId) {
+    query.category = categoryId;
+  }
+
+  const skills = await Skill.find(query).populate("category", "name");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, skills, "Skills fetched successfully"));
+});
+
+export const fetchCategories = asyncHandler(async (req, res) => {
+  const categories = await Category.find({});
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "Categories fetched successfully"));
+});

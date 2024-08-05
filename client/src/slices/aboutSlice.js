@@ -1,50 +1,70 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../axiosConfig";
 
-export const fetchAbout = createAsyncThunk("about/fetchAbout", async () => {
-  const response = await axios.get("/api/about");
-  return response.data;
-});
+const initialState = {
+  story: null,
+  status: "idle",
+  error: null,
+};
 
-export const updateAbout = createAsyncThunk(
-  "about/updateAbout",
-  async (about) => {
-    const response = await axios.put("/api/about", about);
-    return response.data;
+// Fetch My Story Without Auth
+export const fetchMyStoryWithoutAuth = createAsyncThunk(
+  "about/fetchMyStoryWithoutAuth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/story");
+      // Adjust this line to match your API response structure
+      return response.data.data.story; 
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch story"
+      );
+    }
+  }
+);
+
+// Update My Story
+export const updateMyStory = createAsyncThunk(
+  "about/updateMyStory",
+  async (storyData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put("/dashboard/story", storyData);
+      return response.data.data.story; 
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update story"
+      );
+    }
   }
 );
 
 const aboutSlice = createSlice({
   name: "about",
-  initialState: {
-    data: null,
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAbout.pending, (state) => {
+      .addCase(fetchMyStoryWithoutAuth.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchAbout.fulfilled, (state, action) => {
+      .addCase(fetchMyStoryWithoutAuth.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = action.payload;
+        state.story = action.payload;
       })
-      .addCase(fetchAbout.rejected, (state, action) => {
+      .addCase(fetchMyStoryWithoutAuth.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload;
       })
-      .addCase(updateAbout.pending, (state) => {
+      .addCase(updateMyStory.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(updateAbout.fulfilled, (state, action) => {
+      .addCase(updateMyStory.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = action.payload;
+        state.story = action.payload; // Update the story with the new data
       })
-      .addCase(updateAbout.rejected, (state, action) => {
+      .addCase(updateMyStory.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload;
       });
   },
 });
