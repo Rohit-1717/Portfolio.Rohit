@@ -19,6 +19,7 @@ import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import LocomotiveScrollProvider from "./components/LocomotiveScrollProvider";
 
 function App() {
   const isLaptop = useIsLaptop();
@@ -29,20 +30,23 @@ function App() {
       <Router>
         {isLaptop && <Loader />}
         {isLaptop && <CustomCursor />}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route
-            path="/admin/dashboard"
-            element={user ? <Dashboard /> : <Navigate to="/login" replace />}
-          />
-        </Routes>
+        <LocomotiveScrollProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route
+              path="/admin/dashboard"
+              element={user ? <Dashboard /> : <Navigate to="/login" replace />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </LocomotiveScrollProvider>
         <Toaster />
       </Router>
     </>

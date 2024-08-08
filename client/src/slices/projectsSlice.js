@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../axiosConfig"; // Import your configured Axios instance
+import axiosInstance from "../axiosConfig";
 
-// Thunk for fetching projects without authentication
 export const fetchProjectsWithoutAuth = createAsyncThunk(
   "projects/fetchProjectsWithoutAuth",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("projects");
-      return response.data.data; // Assuming response.data.data is an array of projects
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -102,7 +101,7 @@ const projectsSlice = createSlice({
           state.data[index] = updatedProject;
         } else {
           // Add new project if it doesn't exist
-          state.data.push(updatedProject);
+          state.data.unshift(updatedProject); // Place new project at the start
         }
       })
       .addCase(updateProject.rejected, (state, action) => {
