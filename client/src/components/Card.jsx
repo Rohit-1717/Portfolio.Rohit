@@ -28,10 +28,13 @@ function Card() {
   // Ensure projects is an array before attempting to map over it
   const projectItems = Array.isArray(projects) ? projects : [];
 
+  // Create a new array and sort it by uploadDate in descending order
+  const sortedProjects = [...projectItems].sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+
   return (
     <>
       <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-4">
-        {projectItems.map((project) => (
+        {sortedProjects.map((project) => (
           <motion.div
             key={project._id}
             layoutId={project._id.toString()}
@@ -65,23 +68,23 @@ function Card() {
               <motion.img
                 className="h-48 w-full object-cover object-center rounded-lg"
                 src={
-                  projectItems.find((project) => project._id === selectedId)
+                  sortedProjects.find((project) => project._id === selectedId)
                     ?.image
                 }
                 alt={
-                  projectItems.find((project) => project._id === selectedId)
+                  sortedProjects.find((project) => project._id === selectedId)
                     ?.title
                 }
               />
               <motion.h5 className="mt-4 text-lg font-semibold text-center">
                 {
-                  projectItems.find((project) => project._id === selectedId)
+                  sortedProjects.find((project) => project._id === selectedId)
                     ?.description
                 }
               </motion.h5>
               <motion.h2 className="mt-2 text-xl font-bold text-center">
                 {
-                  projectItems.find((project) => project._id === selectedId)
+                  sortedProjects.find((project) => project._id === selectedId)
                     ?.title
                 }
               </motion.h2>

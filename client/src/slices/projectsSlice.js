@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../axiosConfig";
 
+// Thunk for fetching projects without authentication
 export const fetchProjectsWithoutAuth = createAsyncThunk(
   "projects/fetchProjectsWithoutAuth",
   async (_, { rejectWithValue }) => {
@@ -47,6 +48,19 @@ export const updateProject = createAsyncThunk(
   }
 );
 
+// Thunk for deleting a project
+export const deleteProject = createAsyncThunk(
+  "projects/deleteProject",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`dashboard/projects/${projectId}`);
+      return projectId; // Return the project ID to remove it from the state
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const projectsSlice = createSlice({
   name: "projects",
   initialState: {
@@ -63,7 +77,6 @@ const projectsSlice = createSlice({
       })
       .addCase(fetchProjectsWithoutAuth.fulfilled, (state, action) => {
         state.status = "succeeded";
-        // Validate that action.payload is an array
         state.data = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchProjectsWithoutAuth.rejected, (state, action) => {
@@ -77,7 +90,6 @@ const projectsSlice = createSlice({
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
         state.status = "succeeded";
-        // Validate that action.payload is an array
         state.data = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchProjects.rejected, (state, action) => {
@@ -105,6 +117,22 @@ const projectsSlice = createSlice({
         }
       })
       .addCase(updateProject.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || action.error.message;
+      })
+
+      // Delete Project
+      .addCase(deleteProject.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        // Remove the project with the specified ID
+        state.data = state.data.filter(
+          (project) => project._id !== action.payload
+        );
+      })
+      .addCase(deleteProject.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || action.error.message;
       });

@@ -33,6 +33,7 @@ import {
   addOrUpdateProject,
   fetchProjects,
   fetchProjectsWithoutAuth,
+  deleteProject,
 } from "../controllers/project.controller.js";
 
 const router = Router();
@@ -78,5 +79,6 @@ router.get("/dashboard/categories", fetchCategories);
 // Projects routes
 router.put("/dashboard/projects", upload.single("image"), addOrUpdateProject);
 router.get("/dashboard/projects", fetchProjects);
+router.delete("/dashboard/projects/:projectId", deleteProject);
 
 export default router;

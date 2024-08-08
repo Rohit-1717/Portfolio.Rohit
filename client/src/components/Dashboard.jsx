@@ -5,9 +5,14 @@ import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { logoutUser } from "../slices/authSlice";
 import { uploadProfileImage, fetchProfileImage } from "../slices/profileSlice";
-import { updateProject } from "../slices/projectsSlice";
+import {
+  updateProject,
+  deleteProject,
+  fetchProjects,
+} from "../slices/projectsSlice";
 import { updateMyStory } from "../slices/aboutSlice";
 import toast from "react-hot-toast";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -15,6 +20,13 @@ const Dashboard = () => {
 
   const profile = useSelector((state) => state.profile);
   const { image, status: profileStatus, error: profileError } = profile;
+
+  const projects = useSelector((state) => state.projects);
+  const {
+    data: projectData,
+    status: projectsStatus,
+    error: projectsError,
+  } = projects;
 
   const about = useSelector((state) => state.about);
   const { status: aboutStatus, error: aboutError } = about;
@@ -24,44 +36,37 @@ const Dashboard = () => {
   const [projectDescription, setProjectDescription] = useState("");
   const [projectImage, setProjectImage] = useState(null);
   const [myStory, setMyStory] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedProjectTitle, setSelectedProjectTitle] = useState("");
 
   useEffect(() => {
     dispatch(fetchProfileImage());
+    dispatch(fetchProjects());
   }, [dispatch]);
 
   useEffect(() => {
-    if (profileStatus === "loading") {
-      toast.loading("Uploading profile image...", { id: "profile-upload" });
-    } else if (profileStatus === "succeeded") {
-      toast.success("Profile image uploaded successfully!", {
-        id: "profile-upload",
-      });
-    } else if (profileStatus === "failed" && profileError) {
-      toast.error(`Failed to upload profile image: ${profileError}`, {
-        id: "profile-upload",
-      });
+    if (
+      profileStatus === "loading" ||
+      aboutStatus === "loading" ||
+      projectsStatus === "loading"
+    ) {
+      toast.loading("Loading data...", { id: "dashboard-loading" });
+    } else if (
+      profileStatus === "succeeded" ||
+      aboutStatus === "succeeded" ||
+      projectsStatus === "succeeded"
+    ) {
+      toast.dismiss("dashboard-loading");
+    } else if (
+      profileStatus === "failed" ||
+      aboutStatus === "failed" ||
+      projectsStatus === "failed"
+    ) {
+      toast.dismiss("dashboard-loading");
+      toast.error("Failed to load data. Please try again.");
     }
-    // Reset status only after the action has been completed or failed
-    if (profileStatus === "succeeded" || profileStatus === "failed") {
-      dispatch({ type: "profile/resetStatus" });
-    }
-  }, [profileStatus, profileError, dispatch]);
-
-  useEffect(() => {
-    if (aboutStatus === "loading") {
-      toast.loading("Updating story...", { id: "story-update" });
-    } else if (aboutStatus === "succeeded") {
-      toast.success("Story updated successfully!", { id: "story-update" });
-    } else if (aboutStatus === "failed" && aboutError) {
-      toast.error(`Failed to update story: ${aboutError}`, {
-        id: "story-update",
-      });
-    }
-    // Reset status only after the action has been completed or failed
-    if (aboutStatus === "succeeded" || aboutStatus === "failed") {
-      dispatch({ type: "about/resetStatus" });
-    }
-  }, [aboutStatus, aboutError, dispatch]);
+  }, [profileStatus, aboutStatus, projectsStatus]);
 
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => {
@@ -83,20 +88,10 @@ const Dashboard = () => {
     try {
       await dispatch(uploadProfileImage(formData)).unwrap();
       setSelectedFile(null);
+      toast.success("Profile image uploaded successfully!");
     } catch (error) {
-      console.error("Failed to upload profile image", error);
       toast.error("Failed to upload profile image");
     }
-  };
-
-  const handleProjectChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "title") setProjectTitle(value);
-    else if (name === "description") setProjectDescription(value);
-  };
-
-  const handleProjectImageChange = (e) => {
-    setProjectImage(e.target.files[0]);
   };
 
   const handleProjectUpload = async () => {
@@ -114,7 +109,6 @@ const Dashboard = () => {
       setProjectImage(null);
       toast.success("Project uploaded successfully!");
     } catch (error) {
-      console.error("Failed to update project", error);
       toast.error("Failed to upload project");
     }
   };
@@ -125,9 +119,34 @@ const Dashboard = () => {
     try {
       await dispatch(updateMyStory({ story: myStory })).unwrap();
       setMyStory("");
+      toast.success("Story updated successfully!");
     } catch (error) {
-      console.error("Failed to update My Story", error);
       toast.error("Failed to update My Story");
+    }
+  };
+
+  const openDeleteModal = (projectId, projectTitle) => {
+    setSelectedProjectId(projectId);
+    setSelectedProjectTitle(projectTitle);
+    setModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setModalOpen(false);
+    setSelectedProjectId(null);
+    setSelectedProjectTitle("");
+  };
+
+  const handleDeleteProject = async () => {
+    if (selectedProjectId) {
+      try {
+        await dispatch(deleteProject(selectedProjectId)).unwrap();
+        toast.success("Project deleted successfully!");
+      } catch (error) {
+        toast.error("Failed to delete project");
+      } finally {
+        closeDeleteModal();
+      }
     }
   };
 
@@ -140,7 +159,7 @@ const Dashboard = () => {
           <div className="flex justify-end mb-4">
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded shadow-md text-sm sm:text-base"
+              className="bg-red-500 text-white px-4 py-2 rounded shadow-md text-sm sm:text-base hover:bg-red-600 transition"
             >
               Logout
             </button>
@@ -158,54 +177,82 @@ const Dashboard = () => {
             <div className="flex justify-center mb-4">
               <div className="bg-gray-200 h-32 w-32 rounded-full shadow-lg ring-2 ring-blue-500">
                 <img
-                  src={image || "https://via.placeholder.com/128"}
+                  src={image || "default-profile-image.png"}
                   alt="Profile"
-                  className="w-full h-full object-cover object-center rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                 />
               </div>
             </div>
             <input
               type="file"
+              accept="image/*"
               onChange={handleFileChange}
-              className="mb-2 w-full"
+              className="border p-2 rounded w-full mb-4"
             />
             <button
               onClick={handleUpload}
-              className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full"
+              className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full hover:bg-blue-600 transition"
             >
-              Upload Profile Image
+              Upload
             </button>
           </div>
 
           {/* Projects Section */}
           <div className="bg-white p-4 rounded-lg shadow-lg mb-6 border border-gray-300">
             <h3 className="text-xl font-semibold mb-2">Projects</h3>
-            <input
-              type="text"
-              name="title"
-              value={projectTitle}
-              onChange={handleProjectChange}
-              placeholder="Project Title"
-              className="border p-2 rounded mb-2 w-full bg-gray-100"
-            />
-            <textarea
-              name="description"
-              value={projectDescription}
-              onChange={handleProjectChange}
-              placeholder="Project Description"
-              className="border p-2 rounded mb-2 w-full bg-gray-100"
-            />
-            <input
-              type="file"
-              onChange={handleProjectImageChange}
-              className="mb-2 w-full bg-gray-100"
-            />
-            <button
-              onClick={handleProjectUpload}
-              className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full"
-            >
-              Add Project
-            </button>
+            <div className="mb-4">
+              <input
+                type="text"
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="Project Title"
+                className="border p-2 rounded w-full mb-2"
+              />
+              <textarea
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                placeholder="Project Description"
+                className="border p-2 rounded w-full mb-2"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setProjectImage(e.target.files[0])}
+                className="border p-2 rounded w-full mb-2"
+              />
+              <button
+                onClick={handleProjectUpload}
+                className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full hover:bg-blue-600 transition"
+              >
+                Add Project
+              </button>
+            </div>
+            <div className="flex flex-col gap-4">
+              {projectData && projectData.length > 0 ? (
+                projectData.map((project) => (
+                  <div
+                    key={project._id}
+                    className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-sm border border-gray-300"
+                  >
+                    <span className="text-lg font-semibold">
+                      {project.title}
+                    </span>
+                    <button
+                      onClick={() =>
+                        openDeleteModal(project._id, project.title)
+                      }
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">
+                  No projects available.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Update My Story Section */}
@@ -220,7 +267,7 @@ const Dashboard = () => {
               />
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full mt-4"
+                className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full mt-4 hover:bg-blue-600 transition"
               >
                 Update My Story
               </button>
@@ -228,6 +275,12 @@ const Dashboard = () => {
           </div>
         </div>
         <Footer />
+        <ConfirmationModal
+          isOpen={modalOpen}
+          onClose={closeDeleteModal}
+          onConfirm={handleDeleteProject}
+          projectTitle={selectedProjectTitle}
+        />
       </div>
     </>
   );

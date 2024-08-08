@@ -71,7 +71,7 @@ function About() {
           {status === "loading" && <p>Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {status === "succeeded" && story && (
-            <p className="text-[#24262F] font-['Montserrat'] pt-3 text-lg mb-8 md:text-xl">
+            <p className="text-[#24262F]  font-['Montserrat'] pt-3 text-lg mb-8 md:text-xl">
               {story}
             </p>
           )}

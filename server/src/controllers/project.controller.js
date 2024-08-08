@@ -103,4 +103,35 @@ const fetchProjectsWithoutAuth = asyncHandler(async (req, res) => {
   }
 });
 
-export { addOrUpdateProject, fetchProjects, fetchProjectsWithoutAuth };
+const deleteProject = asyncHandler(async (req, res) => {
+  const userId = req.user?.id; // Extract userId from req.user
+  const { projectId } = req.params;
+
+  if (!userId) {
+    throw new ApiError(401, "User ID is required.");
+  }
+
+  const project = await Project.findOne({ _id: projectId, userId });
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  // Optionally, delete the image from Cloudinary if required
+  if (project.image) {
+    // Implement your image deletion logic here if needed
+  }
+
+  await Project.findByIdAndDelete(projectId);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, "Project deleted successfully."));
+});
+
+export {
+  addOrUpdateProject,
+  fetchProjects,
+  fetchProjectsWithoutAuth,
+  deleteProject,
+};
