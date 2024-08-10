@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { IoCloseCircleSharp } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjectsWithoutAuth } from "../slices/projectsSlice";
 
 function Card() {
   const [selectedId, setSelectedId] = useState(null);
+  const [imageDimensions, setImageDimensions] = useState({});
   const dispatch = useDispatch();
   const {
     data: projects,
@@ -13,9 +14,21 @@ function Card() {
     error,
   } = useSelector((state) => state.projects);
 
+  const imageRef = useRef(null);
+
   useEffect(() => {
     dispatch(fetchProjectsWithoutAuth());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (imageRef.current) {
+      const { naturalWidth, naturalHeight } = imageRef.current;
+      setImageDimensions({
+        width: naturalWidth,
+        height: naturalHeight,
+      });
+    }
+  }, [selectedId]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -25,15 +38,14 @@ function Card() {
     return <div>Error: {error}</div>;
   }
 
-  // Ensure projects is an array before attempting to map over it
   const projectItems = Array.isArray(projects) ? projects : [];
-
-  // Create a new array and sort it by uploadDate in descending order
-  const sortedProjects = [...projectItems].sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+  const sortedProjects = [...projectItems].sort(
+    (a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)
+  );
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-4 ">
         {sortedProjects.map((project) => (
           <motion.div
             key={project._id}
@@ -41,18 +53,25 @@ function Card() {
             onClick={() => setSelectedId(project._id)}
             className="cursor-pointer"
           >
-            <motion.div className="h-[50vw] bg-white overflow-hidden rounded-lg shadow-lg md:h-[24vw] lg:h-[20vw]">
+            <motion.div
+              className="bg-white overflow-hidden rounded-lg shadow-lg "
+              style={{
+                width: imageDimensions.width || "auto",
+                height: imageDimensions.height || "auto",
+              }}
+            >
               <motion.img
+                ref={imageRef}
                 className="w-full h-full object-cover object-center"
-                src={project.image} // Updated field based on your schema
+                src={project.image}
                 alt={project.title}
               />
             </motion.div>
-            <motion.h5 className="mt-2 text-center text-lg font-semibold">
-              {project.description} {/* Assuming subtitle is description */}
-            </motion.h5>
-            <motion.h2 className="mt-1 text-center text-xl font-bold">
+            <motion.h5 className="mt-2 text-center text-lg font-bold">
               {project.title}
+            </motion.h5>
+            <motion.h2 className="mt-1 text-center text-xl font-semibold">
+              {project.description}
             </motion.h2>
           </motion.div>
         ))}
@@ -64,9 +83,13 @@ function Card() {
             layoutId={selectedId.toString()}
             className="fixed inset-0 z-10 bg-black bg-opacity-50 flex items-center justify-center"
           >
-            <motion.div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 relative">
+            <motion.div className="relative bg-white rounded-lg shadow-lg p-6">
               <motion.img
-                className="h-48 w-full object-cover object-center rounded-lg"
+                className="object-cover object-center rounded-lg"
+                style={{
+                  width: imageDimensions.width || "auto",
+                  height: imageDimensions.height || "auto",
+                }}
                 src={
                   sortedProjects.find((project) => project._id === selectedId)
                     ?.image

@@ -1,10 +1,10 @@
-// About.js
-
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyStoryWithoutAuth } from "../slices/aboutSlice";
 import Nav from "./Nav";
 import Footer from "./Footer";
+import GlobeComponent from "./Globe/GlobeComponent";
+import StackMarque from "../components/StackMarque"; // Import StackMarques
 
 function About() {
   const dispatch = useDispatch();
@@ -17,13 +17,12 @@ function About() {
   const details = {
     id1: {
       title: "My Stack.",
-      image:
-        "https://images.unsplash.com/photo-1436397543931-01c4a5162bdb?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      // Placeholder for image (no longer used)
+      image: "",
     },
     id2: {
       title: "My Special Place.",
-      image:
-        "https://images.unsplash.com/photo-1469532844423-7e9107f9a96f?q=80&w=1479&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      image: "", // Placeholder for image
     },
   };
 
@@ -55,8 +54,18 @@ function About() {
               <div className="w-full text-xl font-['Montserrat'] font-bold mt-14 pb-4 md:text-3xl">
                 <h2>{item.title}</h2>
               </div>
-              <div className="h-[70vw] w-full bg-green-300 flex items-center justify-center rounded-md mb-4 overflow-hidden md:h-[40vw] lg:h-[30vw]">
-                <img src={item.image} alt={item.title} />
+              <div
+                className={`h-[70vw] w-full bg-green-300 flex items-center justify-center rounded-md mb-4 overflow-hidden md:h-[40vw] lg:h-[30vw] ${
+                  item.title === "My Special Place." ? "relative" : ""
+                }`}
+              >
+                {item.title === "My Stack." ? (
+                  <StackMarque /> // Render StackMarques component
+                ) : item.title === "My Special Place." ? (
+                  <GlobeComponent /> // Render Globe component
+                ) : (
+                  <img src={item.image} alt={item.title} />
+                )}
               </div>
             </div>
           );
