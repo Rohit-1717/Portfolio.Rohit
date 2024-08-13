@@ -16,13 +16,12 @@ function About() {
 
   const details = {
     id1: {
-      title: "My Stack.",
-      // Placeholder for image (no longer used)
+      title: "My Stack",
       image: "",
     },
     id2: {
-      title: "My Special Place.",
-      image: "", // Placeholder for image
+      title: "My Special Place",
+      image: "",
     },
   };
 
@@ -33,7 +32,9 @@ function About() {
         <div className="pr-8 pt-20">
           <h1 className="pb-5 text-6xl font-extrabold text-[#24262F] font-['Montserrat'] lg:text-7xl lg:font-extrabold md:text-6xl">
             About me
-            <span className="text-5xl h-fit w-fit text-[#6E06F2]">.</span>
+            <span className="align-middle text-5xl h-fit w-fit text-[#6E06F2]">
+              .
+            </span>
           </h1>
         </div>
 
@@ -52,16 +53,21 @@ function About() {
           return (
             <div key={key}>
               <div className="w-full text-xl font-['Montserrat'] font-bold mt-14 pb-4 md:text-3xl">
-                <h2>{item.title}</h2>
+                <h2 className="flex items-center text-[#24262F]  ">
+                  {item.title}
+                  <span className="align-middle text-3xl h-fit w-fit text-[#6E06F2] ">
+                    .
+                  </span>
+                </h2>
               </div>
               <div
                 className={`h-[70vw] w-full bg-green-300 flex items-center justify-center rounded-md mb-4 overflow-hidden md:h-[40vw] lg:h-[30vw] ${
-                  item.title === "My Special Place." ? "relative" : ""
+                  item.title === "My Special Place" ? "relative" : ""
                 }`}
               >
-                {item.title === "My Stack." ? (
+                {item.title === "My Stack" ? (
                   <StackMarque /> // Render StackMarques component
-                ) : item.title === "My Special Place." ? (
+                ) : item.title === "My Special Place" ? (
                   <GlobeComponent /> // Render Globe component
                 ) : (
                   <img src={item.image} alt={item.title} />
@@ -72,9 +78,11 @@ function About() {
         })}
 
         <section>
-          <h1 className="text-4xl mt-9 font-extrabold text-[#24262F] font-['Montserrat'] lg:text-7xl lg:font-extrabold md:text-5xl">
+          <h1 className="text-4xl mt-9  font-extrabold text-[#24262F] font-['Montserrat'] lg:text-7xl lg:font-extrabold md:text-5xl">
             My Story
-            <span className="text-5xl h-fit w-fit text-[#6E06F2]">.</span>
+            <span className="align-middle text-5xl h-fit w-fit text-[#6E06F2]">
+              .
+            </span>
           </h1>
 
           {status === "loading" && <p>Loading...</p>}

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../axiosConfig";
 
-// Thunk for fetching projects without authentication
+// Thunks for various actions
 export const fetchProjectsWithoutAuth = createAsyncThunk(
   "projects/fetchProjectsWithoutAuth",
   async (_, { rejectWithValue }) => {
@@ -14,20 +14,18 @@ export const fetchProjectsWithoutAuth = createAsyncThunk(
   }
 );
 
-// Thunk for fetching projects with authentication (optional)
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("dashboard/projects");
-      return response.data.data; // Assuming response.data.data is an array of projects
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
 
-// Thunk for updating or adding a project
 export const updateProject = createAsyncThunk(
   "projects/updateProject",
   async (projectData, { rejectWithValue }) => {
@@ -37,24 +35,47 @@ export const updateProject = createAsyncThunk(
         projectData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Ensure the content type is correct for file uploads
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-      return response.data.data; // Assuming response.data.data contains the updated or new project
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
 
-// Thunk for deleting a project
 export const deleteProject = createAsyncThunk(
   "projects/deleteProject",
   async (projectId, { rejectWithValue }) => {
     try {
       await axiosInstance.delete(`dashboard/projects/${projectId}`);
-      return projectId; // Return the project ID to remove it from the state
+      return projectId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const setBestProjects = createAsyncThunk(
+  "projects/setBestProjects",
+  async (bestProjects, { rejectWithValue }) => {
+    try {
+      // Customize this if needed for interacting with an API
+      return bestProjects;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// New thunk for setting target titles
+export const setTargetTitles = createAsyncThunk(
+  "projects/setTargetTitles",
+  async (titles, { rejectWithValue }) => {
+    try {
+      return titles;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -64,11 +85,26 @@ export const deleteProject = createAsyncThunk(
 const projectsSlice = createSlice({
   name: "projects",
   initialState: {
-    data: [], // Initialize as an empty array
+    data: [], // Array of all projects
+    bestProjects: [], // Array of best projects
+    targetTitles: [], // Array of target titles
     status: "idle",
     error: null,
   },
-  reducers: {},
+  reducers: {
+    addBestProject: (state, action) => {
+      state.bestProjects.push(action.payload);
+    },
+    removeBestProject: (state, action) => {
+      state.bestProjects = state.bestProjects.filter(
+        (project) => project._id !== action.payload
+      );
+    },
+    // New reducer to update target titles
+    updateTargetTitles: (state, action) => {
+      state.targetTitles = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Fetch Projects without Auth
@@ -84,7 +120,7 @@ const projectsSlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      // Fetch Projects with Auth (if needed)
+      // Fetch Projects with Auth
       .addCase(fetchProjects.pending, (state) => {
         state.status = "loading";
       })
@@ -109,11 +145,9 @@ const projectsSlice = createSlice({
         );
 
         if (index !== -1) {
-          // Update existing project
           state.data[index] = updatedProject;
         } else {
-          // Add new project if it doesn't exist
-          state.data.unshift(updatedProject); // Place new project at the start
+          state.data.unshift(updatedProject);
         }
       })
       .addCase(updateProject.rejected, (state, action) => {
@@ -127,7 +161,6 @@ const projectsSlice = createSlice({
       })
       .addCase(deleteProject.fulfilled, (state, action) => {
         state.status = "succeeded";
-        // Remove the project with the specified ID
         state.data = state.data.filter(
           (project) => project._id !== action.payload
         );
@@ -135,8 +168,30 @@ const projectsSlice = createSlice({
       .addCase(deleteProject.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || action.error.message;
+      })
+
+      // Set Best Projects
+      .addCase(setBestProjects.fulfilled, (state, action) => {
+        state.bestProjects = Array.isArray(action.payload)
+          ? action.payload
+          : [];
+      })
+      .addCase(setBestProjects.rejected, (state, action) => {
+        state.error = action.payload || action.error.message;
+      })
+
+      // Set Target Titles
+      .addCase(setTargetTitles.fulfilled, (state, action) => {
+        state.targetTitles = Array.isArray(action.payload)
+          ? action.payload
+          : [];
+      })
+      .addCase(setTargetTitles.rejected, (state, action) => {
+        state.error = action.payload || action.error.message;
       });
   },
 });
 
+export const { addBestProject, removeBestProject, updateTargetTitles } =
+  projectsSlice.actions;
 export default projectsSlice.reducer;

@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectImage, setProjectImage] = useState(null);
+  const [projectGithubLink, setProjectGithubLink] = useState("");
+  const [projectLiveLink, setProjectLiveLink] = useState("");
   const [myStory, setMyStory] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
@@ -101,12 +103,16 @@ const Dashboard = () => {
     formData.append("title", projectTitle);
     formData.append("description", projectDescription);
     formData.append("image", projectImage);
+    formData.append("githubLink", projectGithubLink);
+    formData.append("liveLink", projectLiveLink);
 
     try {
       await dispatch(updateProject(formData)).unwrap();
       setProjectTitle("");
       setProjectDescription("");
       setProjectImage(null);
+      setProjectGithubLink("");
+      setProjectLiveLink("");
       toast.success("Project uploaded successfully!");
     } catch (error) {
       toast.error("Failed to upload project");
@@ -165,17 +171,19 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <h2 className="text-2xl font-bold mb-4 text-[#6E06F2]">Dashboard</h2>
-          <p className="text-lg mb-6">
+          <h2 className="text-3xl font-bold mb-4 text-[#6E06F2]">Dashboard</h2>
+          <p className="text-lg mb-6 text-[#24262F]">
             Welcome, <span className="text-[#6E06F2] font-semibold">Rohit</span>
             !
           </p>
 
           {/* Profile Image */}
           <div className="bg-white p-4 rounded-lg shadow-lg mb-6 border border-gray-300">
-            <h3 className="text-xl font-semibold mb-2">Profile Image</h3>
+            <h3 className="text-xl font-semibold mb-2 text-[#24262F]">
+              Profile Image
+            </h3>
             <div className="flex justify-center mb-4">
-              <div className="bg-gray-200 h-32 w-32 rounded-full shadow-lg ring-2 ring-blue-500">
+              <div className="bg-gray-200 h-32 w-32 rounded-full shadow-lg ring-2 ring-[#6E06F2]">
                 <img
                   src={image || "default-profile-image.png"}
                   alt="Profile"
@@ -191,7 +199,7 @@ const Dashboard = () => {
             />
             <button
               onClick={handleUpload}
-              className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full hover:bg-blue-600 transition"
+              className="bg-[#6E06F2] text-white px-4 py-2 rounded shadow-md w-full"
             >
               Upload
             </button>
@@ -199,7 +207,9 @@ const Dashboard = () => {
 
           {/* Projects Section */}
           <div className="bg-white p-4 rounded-lg shadow-lg mb-6 border border-gray-300">
-            <h3 className="text-xl font-semibold mb-2">Projects</h3>
+            <h3 className="text-xl font-semibold mb-2 text-[#24262F]">
+              Projects
+            </h3>
             <div className="mb-4">
               <input
                 type="text"
@@ -220,9 +230,23 @@ const Dashboard = () => {
                 onChange={(e) => setProjectImage(e.target.files[0])}
                 className="border p-2 rounded w-full mb-2"
               />
+              <input
+                type="text"
+                value={projectGithubLink}
+                onChange={(e) => setProjectGithubLink(e.target.value)}
+                placeholder="GitHub Link"
+                className="border p-2 rounded w-full mb-2"
+              />
+              <input
+                type="text"
+                value={projectLiveLink}
+                onChange={(e) => setProjectLiveLink(e.target.value)}
+                placeholder="Live Link"
+                className="border p-2 rounded w-full mb-2"
+              />
               <button
                 onClick={handleProjectUpload}
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full hover:bg-blue-600 transition"
+                className="bg-[#6E06F2] text-white px-4 py-2 rounded shadow-md w-full "
               >
                 Add Project
               </button>
@@ -234,7 +258,7 @@ const Dashboard = () => {
                     key={project._id}
                     className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-sm border border-gray-300"
                   >
-                    <span className="text-lg font-semibold">
+                    <span className="text-lg font-semibold text-[#24262F]">
                       {project.title}
                     </span>
                     <button
@@ -254,10 +278,13 @@ const Dashboard = () => {
               )}
             </div>
           </div>
+          
 
           {/* Update My Story Section */}
           <div className="bg-white p-4 rounded-lg shadow-lg mb-6 border border-gray-300">
-            <h3 className="text-xl font-semibold mb-2">Update My Story</h3>
+            <h3 className="text-xl font-semibold mb-2 text-[#24262F]">
+              Update My Story
+            </h3>
             <form onSubmit={handleMyStorySubmit}>
               <textarea
                 value={myStory}
@@ -267,7 +294,7 @@ const Dashboard = () => {
               />
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow-md w-full mt-4 hover:bg-blue-600 transition"
+                className="bg-[#6E06F2] text-white px-4 py-2 rounded shadow-md w-full mt-4 "
               >
                 Update My Story
               </button>

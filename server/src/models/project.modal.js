@@ -17,11 +17,14 @@ const projectSchema = new Schema(
       type: String,
       required: true,
     },
-    link: {
+    githubLink: {
       type: String,
       required: false,
     },
-
+    liveLink: {
+      type: String,
+      required: false,
+    },
     image: {
       type: String,
       required: true,

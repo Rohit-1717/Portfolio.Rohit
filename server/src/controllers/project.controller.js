@@ -8,7 +8,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 // Add or update project
 const addOrUpdateProject = asyncHandler(async (req, res) => {
   const userId = req.user?.id; // Extract userId from req.user
-  const { title, description, link, technologies } = req.body;
+  const { title, description, githubLink, liveLink, technologies } = req.body;
 
   // Validate required fields
   if (!userId) {
@@ -44,7 +44,8 @@ const addOrUpdateProject = asyncHandler(async (req, res) => {
     userId,
     title,
     description,
-    link,
+    githubLink,
+    liveLink,
     technologies,
     image: imageUrl,
   };
@@ -128,6 +129,7 @@ const deleteProject = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, null, "Project deleted successfully."));
 });
+
 
 export {
   addOrUpdateProject,
