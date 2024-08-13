@@ -2,7 +2,7 @@ import React from "react";
 import Nav from "./Nav";
 import Footer from "./Footer";
 import { CgMail } from "react-icons/cg";
-import { IoMdCall } from "react-icons/io";
+import { FaXTwitter } from "react-icons/fa6";
 import ProfileImage from "./ProfileImage";
 import { FaLinkedinIn } from "react-icons/fa";
 import { IoLogoInstagram } from "react-icons/io5";
@@ -37,13 +37,14 @@ function Contact() {
         </div>
         <div className="contacts flex items-center gap-4 mb-5">
           <a
-            href="tel:+919934119958"
-            className="flex items-center text-[#4E525A] text-[5vw] font-[600]  md:text-2xl"
+            href="https://x.com/rohitVish_1717"
+            target="_blank"
+            className="flex items-center text-[#4E525A] text-[5vw] font-[600] md:text-2xl"
           >
             <div className="w-10 h-10 p-2 border border-[#4E525A] text-[#24262F] text-5xl rounded-full flex items-center justify-center">
-              <IoMdCall />
+            <FaXTwitter />
             </div>
-            <span className="ml-2">+91 9934119958</span>
+            <span className="ml-2">Twitter</span>
           </a>
         </div>
         <div className="contacts flex items-center gap-4 mb-5">
