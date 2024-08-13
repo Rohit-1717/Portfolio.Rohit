@@ -42,7 +42,7 @@ function Contact() {
             className="flex items-center text-[#4E525A] text-[5vw] font-[600] md:text-2xl"
           >
             <div className="w-10 h-10 p-2 border border-[#4E525A] text-[#24262F] text-5xl rounded-full flex items-center justify-center">
-            <FaXTwitter />
+              <FaXTwitter />
             </div>
             <span className="ml-2">Twitter</span>
           </a>

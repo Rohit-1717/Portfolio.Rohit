@@ -13,7 +13,7 @@ function ProjectCards() {
   } = useSelector((state) => state.projects);
 
   // Define the titles you want to match
-  const targetTitles = ["Portfolio Project", "Github Project", "Hey"];
+  const targetTitles = ["Realtime Device Tracking System", "E-Commerce Store"];
 
   useEffect(() => {
     dispatch(fetchProjectsWithoutAuth());
@@ -57,6 +57,7 @@ function ProjectCards() {
                 <div className="p-4">
                   <h1 className="text-2xl lg:text-5xl text-[#24262F] font-bold font-['Montserrat'] md:text-4xl">
                     <NavLink
+                    target="_blank"
                       to={project.liveLink}
                       className="hover:text-[#6E06F2]"
                     >

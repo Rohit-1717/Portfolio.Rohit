@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,15 +20,48 @@ import Dashboard from "./components/Dashboard";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import LocomotiveScrollProvider from "./components/LocomotiveScrollProvider";
+import axiosInstance from "./axiosConfig";
 
 function App() {
   const isLaptop = useIsLaptop();
-  const { user } = useSelector((state) => state.auth); // Get user state from Redux
+  const { user } = useSelector((state) => state.auth);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        // Simulate progress increment
+        const interval = setInterval(() => {
+          setProgress((prev) => {
+            if (prev >= 100) {
+              clearInterval(interval);
+              return 100;
+            }
+            return prev + 10; // Increment progress
+          });
+        }, 200); // Simulate progress interval
+
+        // Fetch initial data
+        await axiosInstance.get("profile-image");
+        // Simulate loading delay
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      } finally {
+        setIsLoading(false);
+        setProgress(100);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
 
   return (
     <>
       <Router>
-        {isLaptop && <Loader />}
+        {isLaptop && <Loader isLoading={isLoading} progress={progress} />}
         {isLaptop && <CustomCursor />}
         <LocomotiveScrollProvider>
           <Routes>

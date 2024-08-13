@@ -7,11 +7,7 @@ import { fetchProjectsWithoutAuth } from "../slices/projectsSlice";
 function Card() {
   const [selectedId, setSelectedId] = useState(null);
   const dispatch = useDispatch();
-  const {
-    data: projects,
-    status,
-    error,
-  } = useSelector((state) => state.projects);
+  const { data: projects, status, error } = useSelector((state) => state.projects);
 
   useEffect(() => {
     dispatch(fetchProjectsWithoutAuth());
@@ -32,17 +28,17 @@ function Card() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-3 font-['Montserrat'] ">
+      <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-3 font-['Montserrat']">
         {sortedProjects.map((project) => (
           <motion.div
             key={project._id}
             layoutId={project._id.toString()}
             onClick={() => setSelectedId(project._id)}
-            className="cursor-pointer overflow-hidden rounded-lg shadow-lg bg-white hover:shadow-xl transition-shadow duration-300 "
+            className="cursor-pointer overflow-hidden rounded-lg shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
           >
-            <motion.div className="h-[50vw] bg-white overflow-hidden rounded-lg shadow-lg md:h-[24vw] lg:h-[20vw]">
+            <motion.div className="relative w-full overflow-hidden rounded-lg bg-white">
               <motion.img
-                className="w-full h-full object-cover object-center"
+                className="w-full h-auto object-cover object-center"
                 src={project.image}
                 alt={project.title}
               />
@@ -67,7 +63,7 @@ function Card() {
           >
             <motion.div className="relative bg-white rounded-lg shadow-lg max-w-xl w-full p-6 font-['Montserrat']">
               <motion.img
-                className="w-full object-cover object-center rounded-lg"
+                className="w-full h-auto object-cover object-center rounded-lg"
                 src={
                   sortedProjects.find((project) => project._id === selectedId)
                     ?.image
@@ -109,7 +105,7 @@ function Card() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-800 text-white px-4 py-2 rounded-md  transition-colors"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-md transition-colors"
                   onClick={(e) => e.stopPropagation()} // Prevent click event from closing the modal
                 >
                   GitHub
