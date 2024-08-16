@@ -236,7 +236,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     // Handle errors in sending email
-    console.error("Error sending email:", error);
+    // console.error("Error sending email:", error);
     throw new ApiError(
       500,
       "Failed to send password reset email. Please try again later."

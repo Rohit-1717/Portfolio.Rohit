@@ -13,7 +13,7 @@ const uploadProfileImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No file uploaded.");
   }
 
-  console.log(req.file);
+  // console.log(req.file);
 
   const uploadResult = await uploadOnCloudinary(req.file.path);
   if (!uploadResult) {
@@ -23,7 +23,7 @@ const uploadProfileImage = asyncHandler(async (req, res) => {
   try {
     await fs.unlink(req.file.path);
   } catch (err) {
-    console.error(`Failed to delete temp file: ${err.message}`);
+    // console.error(`Failed to delete temp file: ${err.message}`);
   }
 
   let profileImage = await ProfileImage.findOne({ userId: user._id });

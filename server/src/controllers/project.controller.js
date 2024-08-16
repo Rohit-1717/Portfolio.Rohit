@@ -35,7 +35,7 @@ const addOrUpdateProject = asyncHandler(async (req, res) => {
     try {
       await fs.unlink(req.file.path);
     } catch (err) {
-      console.error(`Failed to delete temp file: ${err.message}`);
+      // console.error(`Failed to delete temp file: ${err.message}`);
     }
   }
 
