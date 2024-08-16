@@ -26,7 +26,7 @@ app.use(helmet());
 const allowedOrigins = [
   'http://localhost:5173',
   'https://portfolio-rohit-ohbne847e-rohit-vishwakarmas-projects-95176ae8.vercel.app',
-  'https://portfolio-rohit-cyf8dgrzf-rohit-vishwakarmas-projects-95176ae8.vercel.app',
+  'https://rohit-portfolio-server-2grr5.ondigitalocean.app/'
 ];
 
 app.use(cors({
