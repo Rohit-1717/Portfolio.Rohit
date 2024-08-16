@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Include cookies in requests
+  withCredentials: true, 
 });
 
 // No need for an Authorization header since the token is in a cookie
