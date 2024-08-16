@@ -85,7 +85,7 @@ function Register() {
       if (registerUser.fulfilled.match(resultAction)) {
         // Store token in session storage
         localStorage.setItem("token", resultAction.payload.token);
-        console.log("Registration successful. Payload:", resultAction.payload);
+        // console.log("Registration successful. Payload:", resultAction.payload);
 
         toast.success("Registration successful!");
         navigate("/admin/dashboard");

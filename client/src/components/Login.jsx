@@ -50,7 +50,7 @@ function Login() {
 
       if (loginUser.fulfilled.match(resultAction)) {
         // Debug: Check the resultAction payload
-        console.log("Login successful. Payload:", resultAction.payload);
+        // console.log("Login successful. Payload:", resultAction.payload);
 
         // Store the token in session storage
         localStorage.setItem("token", resultAction.payload.token);

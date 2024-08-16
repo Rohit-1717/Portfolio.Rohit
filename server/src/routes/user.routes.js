@@ -36,8 +36,6 @@ import {
   deleteProject,
 } from "../controllers/project.controller.js";
 
-
-
 const router = Router();
 
 // Public routes
@@ -82,7 +80,5 @@ router.get("/dashboard/categories", fetchCategories);
 router.put("/dashboard/projects", upload.single("image"), addOrUpdateProject);
 router.get("/dashboard/projects", fetchProjects);
 router.delete("/dashboard/projects/:projectId", deleteProject);
-
-
 
 export default router;
