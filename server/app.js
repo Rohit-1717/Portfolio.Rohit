@@ -23,22 +23,16 @@ app.use(limiter);
 // Security Headers
 app.use(helmet());
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://portfolio-rohit-ohbne847e-rohit-vishwakarmas-projects-95176ae8.vercel.app',
-  'https://rohit-portfolio-server-2grr5.ondigitalocean.app/'
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "https://portfolio-rohit-cyf8dgrzf-rohit-vishwakarmas-projects-95176ae8.vercel.app",
+      "https://portfolio-rohit-ohbne847e-rohit-vishwakarmas-projects-95176ae8.vercel.app",
+      "http://localhost:5173", // for local development
+    ],
+    credentials: true, // Allow cookies to be sent with requests
+  })
+);
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
