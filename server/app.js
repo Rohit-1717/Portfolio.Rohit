@@ -27,7 +27,6 @@ app.use(
   cors({
     origin: [
       'https://portfolio-rohit-mu.vercel.app',
-      
       "http://localhost:5173", // for local development
     ],
     credentials: true,
