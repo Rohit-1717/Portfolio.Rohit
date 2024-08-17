@@ -26,7 +26,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      'https://portfolio-rohit-mu.vercel.app',
+      'https://www.rohitvishwakarma.tech',
       "http://localhost:5173", // for local development
     ],
     credentials: true,
