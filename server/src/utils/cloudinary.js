@@ -24,10 +24,10 @@ const uploadOnCloudinary = async (localFilePath) => {
       resource_type: "image",
     });
 
-    // console.log("File is uploaded on Cloudinary:", uploadResult.secure_url);
+    console.log("File is uploaded on Cloudinary:", uploadResult.secure_url);
     return uploadResult;
   } catch (error) {
-    // console.error("Cloudinary upload error:", error.message);
+    console.error("Cloudinary upload error:", error.message);
 
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
