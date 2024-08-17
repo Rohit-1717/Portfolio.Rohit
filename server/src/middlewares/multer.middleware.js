@@ -1,7 +1,6 @@
 import multer from "multer";
 import path from "path";
 
-const uploadDir = path.resolve(__dirname, '../../public/uploads');
 
 
 const storage = multer.diskStorage({
