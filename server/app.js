@@ -26,8 +26,8 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      "https://portfolio-rohit-cyf8dgrzf-rohit-vishwakarmas-projects-95176ae8.vercel.app",
-      "https://portfolio-rohit-ohbne847e-rohit-vishwakarmas-projects-95176ae8.vercel.app",
+      'https://portfolio-rohit-mu.vercel.app/',
+      
       "http://localhost:5173", // for local development
     ],
     credentials: true, // Allow cookies to be sent with requests
