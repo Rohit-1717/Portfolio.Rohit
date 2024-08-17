@@ -133,21 +133,13 @@ const loginUser = asyncHandler(async (req, res) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
-    maxAge: parseInt(process.env.ACCESS_TOKEN_EXPIRY) * 1000, // convert to milliseconds
-    expires: new Date(
-      Date.now() + parseInt(process.env.ACCESS_TOKEN_EXPIRY) * 1000
-    ), // convert to milliseconds
+    sameSite: "none",
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
-    maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRY) * 1000, // convert to milliseconds
-    expires: new Date(
-      Date.now() + parseInt(process.env.REFRESH_TOKEN_EXPIRY) * 1000
-    ), // convert to milliseconds
+    sameSite: "none",
   });
 
   // Send response
