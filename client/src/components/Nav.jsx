@@ -115,7 +115,7 @@ function Nav() {
 
             <NavLink
               target="_blank"
-              to="https://drive.google.com/drive/folders/15l-CzZpPEfOaHafUDF0-a"
+              to="https://drive.google.com/file/d/1RI0rzRZ52WDZ3XS9VfxPmIX6PVQXMc0q/view?usp=sharing"
               className={({ isActive }) =>
                 isActive
                   ? " my-1 text-blue-500 transition-colors duration-300 transform md:mx-4 md:my-0"
