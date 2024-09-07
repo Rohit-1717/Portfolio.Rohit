@@ -6,6 +6,7 @@ function ProfileImage() {
   const dispatch = useDispatch();
   const { image, status, error } = useSelector((state) => state.profile);
   const [imageUrl, setImageUrl] = useState(null);
+  console.log(imageUrl);
 
   useEffect(() => {
     // Fetch the profile image URL without authentication when the component mounts
