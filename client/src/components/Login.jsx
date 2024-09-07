@@ -148,7 +148,7 @@ function Login() {
             </p>
           </form>
 
-          <p className="mt-8 text-sm font-light text-center text-gray-400 md:text-xl">
+          {/* <p className="mt-8 text-sm font-light text-center text-gray-400 md:text-xl">
             Don't have an account?{" "}
             <NavLink
               to="/"
@@ -156,7 +156,7 @@ function Login() {
             >
               Create One
             </NavLink>
-          </p>
+          </p> */}
         </div>
       </section>
       <Footer />
