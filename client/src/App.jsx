@@ -29,7 +29,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [underMaintenance, setUnderMaintenance] = useState(true); // Set maintenance flag
+  const [underMaintenance, setUnderMaintenance] = useState(false); // Set maintenance flag
 
   useEffect(() => {
     const fetchInitialData = async () => {

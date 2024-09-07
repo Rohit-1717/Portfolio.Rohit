@@ -151,7 +151,7 @@ function Login() {
           <p className="mt-8 text-sm font-light text-center text-gray-400 md:text-xl">
             Don't have an account?{" "}
             <NavLink
-              to="/register"
+              to="/"
               className="font-medium text-gray-700 hover:underline"
             >
               Create One
